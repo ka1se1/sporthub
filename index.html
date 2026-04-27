@@ -922,14 +922,33 @@
         function parseMlbSummary(data) {
             const liveData = data.liveData;
             const gameData = data.gameData;
+            const homeName = gameData?.teams?.home?.name;
+            const awayName = gameData?.teams?.away?.name;
 
             const allPlays = liveData?.plays?.allPlays || [];
             const scoringPlays = allPlays.filter(p => p.about?.isScoringPlay).map(p => {
+                const isAway = p.about.halfInning === 'top';
+                const teamName = isAway ? awayName : homeName;
+                // result.event = "Home Run", "Single", "Double", "Walk", "Sac Fly", "Wild Pitch", etc.
+                const eventType = p.result?.event || "";
+                const desc = p.result?.description || "";
+                // Find batter & responsible pitcher
+                const batter = p.matchup?.batter?.fullName || null;
+                const pitcher = p.matchup?.pitcher?.fullName || null;
+                const isHomeRun = /home run/i.test(eventType);
+                const isGrandSlam = /grand slam/i.test(desc);
                 return {
-                    when: `${p.about.halfInning === 'top' ? '表' : '裏'} ${p.about.inning}回`,
-                    team: p.about.halfInning === 'top' ? gameData?.teams?.away?.name : gameData?.teams?.home?.name,
-                    text: p.result?.description || "",
-                    score: p.result ? `${p.result.awayScore}-${p.result.homeScore}` : null
+                    when: `${isAway ? '表' : '裏'}${p.about.inning}回`,
+                    inning: p.about.inning,
+                    halfInning: p.about.halfInning,
+                    team: teamName, homeAway: isAway ? "away" : "home",
+                    text: desc,
+                    score: p.result ? `${p.result.awayScore}-${p.result.homeScore}` : null,
+                    eventType,
+                    batter,
+                    pitcher,
+                    isHomeRun,
+                    isGrandSlam,
                 };
             });
 
@@ -942,7 +961,28 @@
                 return { hits: b.hits ?? 0, errors: f.errors ?? 0, homeRuns: b.homeRuns ?? 0, strikeOuts: b.strikeOuts ?? 0 };
             };
 
-            const teamStats = homeBox && awayBox ? { home: toStats(homeBox), away: toStats(awayBox), homeName: gameData?.teams?.home?.name, awayName: gameData?.teams?.away?.name } : null;
+            const teamStats = homeBox && awayBox ? { home: toStats(homeBox), away: toStats(awayBox), homeName, awayName } : null;
+
+            // Linescore (MLB official format: per-inning runs, hits, errors)
+            const ls = liveData?.linescore;
+            let linescore = null;
+            if (ls && Array.isArray(ls.innings)) {
+                const homeRuns = ls.innings.map((inn) => inn.home?.runs);
+                const awayRuns = ls.innings.map((inn) => inn.away?.runs);
+                linescore = {
+                    home: homeRuns,
+                    away: awayRuns,
+                    homeTotal: ls.teams?.home?.runs ?? null,
+                    awayTotal: ls.teams?.away?.runs ?? null,
+                    homeHits: ls.teams?.home?.hits ?? null,
+                    awayHits: ls.teams?.away?.hits ?? null,
+                    homeErrors: ls.teams?.home?.errors ?? null,
+                    awayErrors: ls.teams?.away?.errors ?? null,
+                    currentInning: ls.currentInning,
+                    inningHalf: ls.inningHalf, // "Top" or "Bottom"
+                    isComplete: gameData?.status?.abstractGameState === "Final",
+                };
+            }
 
             const getLineup = (box) => {
                 const order = box?.battingOrder || [];
@@ -956,7 +996,7 @@
             const homeLineup = getLineup(homeBox);
             const lineups = awayLineup && homeLineup ? { home: homeLineup, away: awayLineup } : null;
 
-            return { scoringPlays, teamStats, lineups, formations: null, venue: gameData?.venue?.name || null, attendance: gameData?.gameInfo?.attendance || null };
+            return { scoringPlays, teamStats, lineups, formations: null, venue: gameData?.venue?.name || null, attendance: gameData?.gameInfo?.attendance || null, linescore };
         }
 
 
@@ -1376,11 +1416,31 @@
                                         </div>
                                     )}
 
-                                    {/* Baseball / generic scoring plays */}
-                                    {sport !== "soccer" && sport !== "basketball" && (
+                                    {/* Baseball: Inning-by-inning linescore (1-9 + R H E) */}
+                                    {sport === "baseball" && detail.linescore && (
                                         <div style={{ marginBottom: 20 }}>
                                             <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
-                                                {sport === "baseball" ? "得点経過" : "得点シーン"}
+                                                イニング別スコア
+                                            </div>
+                                            <BaseballLinescore linescore={detail.linescore} accent={league.accent} game={game} />
+                                        </div>
+                                    )}
+
+                                    {/* Baseball: Detailed scoring plays */}
+                                    {sport === "baseball" && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                得点経過
+                                            </div>
+                                            <BaseballScoringList scoringPlays={detail.scoringPlays} accent={league.accent} game={game} />
+                                        </div>
+                                    )}
+
+                                    {/* Other sports - generic scoring plays */}
+                                    {sport !== "soccer" && sport !== "basketball" && sport !== "baseball" && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                得点シーン
                                             </div>
                                             {detail.scoringPlays.length === 0 ? (
                                                 <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center", background: "#141414", border: "1px solid #1f1f1f" }}>
@@ -1421,6 +1481,126 @@
                             )}
                         </div>
                     </div>
+                </div>
+            );
+        }
+
+        function BaseballLinescore({ linescore, accent, game }) {
+            if (!linescore || (!linescore.home?.length && !linescore.away?.length)) {
+                return <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center" }}>{game.status === "scheduled" ? "試合開始前です" : "イニングデータがありません"}</div>;
+            }
+            const innings = Math.max(linescore.home.length, linescore.away.length, 9);
+            const labels = [];
+            for (let i = 0; i < innings; i++) labels.push(`${i + 1}`);
+            // Columns: TEAM | 1 | 2 | ... | n | R | H | E
+            const cols = `36px ${labels.map(() => "minmax(20px, 1fr)").join(" ")} 28px 28px 28px`;
+
+            const renderCell = (val, half, inn) => {
+                // Top half not yet played by home team in current inning
+                if (val == null || val === undefined) {
+                    if (half === "home" && linescore.currentInning === inn + 1 && linescore.inningHalf === "Top" && !linescore.isComplete) return "";
+                    return "—";
+                }
+                return val;
+            };
+
+            return (
+                <div style={{ background: "#141414", border: "1px solid #1f1f1f", overflow: "auto" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: cols, padding: "10px 8px", borderBottom: "1px solid #1f1f1f", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, fontWeight: 700, minWidth: 360 }}>
+                        <span></span>
+                        {labels.map((l) => <span key={l} style={{ textAlign: "center" }}>{l}</span>)}
+                        <span style={{ textAlign: "right", color: accent }}>R</span>
+                        <span style={{ textAlign: "right", color: "#999" }}>H</span>
+                        <span style={{ textAlign: "right", color: "#999" }}>E</span>
+                    </div>
+                    {[
+                        { key: "away", name: game.awayShort || "AWAY", scores: linescore.away, total: linescore.awayTotal, hits: linescore.awayHits, errors: linescore.awayErrors },
+                        { key: "home", name: game.homeShort || "HOME", scores: linescore.home, total: linescore.homeTotal, hits: linescore.homeHits, errors: linescore.homeErrors },
+                    ].map((row, ri) => (
+                        <div key={ri} style={{ display: "grid", gridTemplateColumns: cols, padding: "12px 8px", alignItems: "center", borderBottom: ri === 0 ? "1px solid #1a1a1a" : "none", minWidth: 360 }}>
+                            <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontSize: 13, fontWeight: 800, color: "#fff", letterSpacing: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.name}</span>
+                            {labels.map((_, i) => {
+                                const v = row.scores?.[i];
+                                const isCurrent = linescore.currentInning === i + 1 && !linescore.isComplete;
+                                return (
+                                    <span key={i} style={{ textAlign: "center", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: isCurrent ? accent : "#ddd", fontWeight: isCurrent ? 800 : 600, fontVariantNumeric: "tabular-nums" }}>
+                                        {renderCell(v, row.key, i)}
+                                    </span>
+                                );
+                            })}
+                            <span style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: 15, color: accent, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>{row.total ?? "—"}</span>
+                            <span style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#aaa", fontVariantNumeric: "tabular-nums" }}>{row.hits ?? "—"}</span>
+                            <span style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#aaa", fontVariantNumeric: "tabular-nums" }}>{row.errors ?? "—"}</span>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function translateMlbEvent(eventType, isHomeRun, isGrandSlam) {
+            if (isGrandSlam) return { jp: "満塁本塁打", emoji: "💥", highlight: true };
+            if (isHomeRun) return { jp: "本塁打", emoji: "⚾", highlight: true };
+            const map = {
+                "Single": { jp: "単打", emoji: "" },
+                "Double": { jp: "二塁打", emoji: "" },
+                "Triple": { jp: "三塁打", emoji: "" },
+                "Walk": { jp: "四球", emoji: "" },
+                "Hit By Pitch": { jp: "死球", emoji: "" },
+                "Sac Fly": { jp: "犠飛", emoji: "" },
+                "Sac Bunt": { jp: "犠打", emoji: "" },
+                "Wild Pitch": { jp: "暴投", emoji: "" },
+                "Passed Ball": { jp: "捕逸", emoji: "" },
+                "Field Error": { jp: "失策", emoji: "" },
+                "Forceout": { jp: "封殺", emoji: "" },
+                "Grounded Into DP": { jp: "併殺", emoji: "" },
+                "Strikeout": { jp: "三振", emoji: "" },
+                "Groundout": { jp: "ゴロアウト", emoji: "" },
+                "Flyout": { jp: "フライアウト", emoji: "" },
+            };
+            return map[eventType] || { jp: eventType || "—", emoji: "" };
+        }
+
+        function BaseballScoringList({ scoringPlays, accent, game }) {
+            if (!scoringPlays || scoringPlays.length === 0) {
+                return <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center" }}>{game.status === "scheduled" ? "試合開始前です" : "得点データがありません"}</div>;
+            }
+            return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {scoringPlays.map((p, i) => {
+                        const tr = translateMlbEvent(p.eventType, p.isHomeRun, p.isGrandSlam);
+                        const isAway = p.homeAway === "away";
+                        return (
+                            <div key={i} style={{ background: tr.highlight ? "linear-gradient(90deg, rgba(255,77,46,0.08) 0%, transparent 60%)" : "#141414", border: tr.highlight ? `1px solid ${accent}` : "1px solid #1f1f1f", borderLeft: `3px solid ${tr.highlight ? accent : "#444"}`, padding: "12px 14px" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: accent, fontWeight: 800, letterSpacing: 0.5 }}>
+                                            {p.when}
+                                        </span>
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 0.5, padding: "2px 6px", border: "1px solid #2a2a2a" }}>
+                                            {isAway ? game.awayShort : game.homeShort}
+                                        </span>
+                                        {tr.jp && (
+                                            <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: tr.highlight ? accent : "#aaa", fontWeight: 700 }}>
+                                                {tr.emoji} {tr.jp}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {p.score && (
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#888", fontVariantNumeric: "tabular-nums", fontWeight: 700 }}>
+                                            {p.score}
+                                        </span>
+                                    )}
+                                </div>
+                                {p.batter && (
+                                    <div style={{ fontWeight: 700, color: "#fff", fontSize: 14, marginBottom: 4 }}>
+                                        {tr.highlight ? "🦸 " : "🏏 "}{p.batter}
+                                        {p.pitcher && <span style={{ fontSize: 10, color: "#666", fontWeight: 400, marginLeft: 8 }}>vs {p.pitcher}</span>}
+                                    </div>
+                                )}
+                                <div style={{ fontSize: 11, color: "#888", lineHeight: 1.5 }}>{p.text}</div>
+                            </div>
+                        );
+                    })}
                 </div>
             );
         }

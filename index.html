@@ -777,24 +777,87 @@
         }
 
         function parseSummary(data, sport) {
-            const out = { scoringPlays: [], teamStats: null, venue: null, attendance: null, lineups: null, formations: null };
+            const out = { scoringPlays: [], teamStats: null, venue: null, attendance: null, lineups: null, formations: null, linescore: null, topScorers: null };
+
+            // Determine home/away team names for matching scoring plays to teams
+            const compHome = data.header?.competitions?.[0]?.competitors?.find((c) => c.homeAway === "home");
+            const compAway = data.header?.competitions?.[0]?.competitors?.find((c) => c.homeAway === "away");
+            const homeName = compHome?.team?.displayName || compHome?.team?.name;
+            const awayName = compAway?.team?.displayName || compAway?.team?.name;
 
             if (Array.isArray(data.scoringPlays)) {
                 out.scoringPlays = data.scoringPlays.map((p) => {
                     const teamName = p.team?.displayName || p.team?.name || "";
+                    const isHome = teamName === homeName;
+                    const homeAway = isHome ? "home" : "away";
+
                     if (sport === "baseball") {
                         return {
                             when: `${p.period?.type === "Top" || p.inningHalf === "Top" ? "表" : p.period?.type === "Bottom" || p.inningHalf === "Bottom" ? "裏" : ""}${p.period?.number ?? p.inning ?? ""}回`,
-                            team: teamName, text: p.text || p.description || "", score: p.awayScore != null && p.homeScore != null ? `${p.awayScore}-${p.homeScore}` : null,
+                            team: teamName, homeAway,
+                            text: p.text || p.description || "",
+                            score: p.awayScore != null && p.homeScore != null ? `${p.awayScore}-${p.homeScore}` : null,
                         };
                     }
+
+                    if (sport === "soccer") {
+                        // Soccer: extract minute, scorer, assist, type
+                        const minute = p.clock?.displayValue || (p.period?.number ? `${p.period.number}'` : "");
+                        const athletes = Array.isArray(p.athletesInvolved) ? p.athletesInvolved : [];
+                        const scorer = athletes[0]?.displayName || athletes[0]?.shortName || p.scorer?.displayName || null;
+                        // Try to extract assist - usually the 2nd athlete
+                        let assist = null;
+                        if (athletes.length > 1) assist = athletes[1].displayName || athletes[1].shortName;
+                        // Detect type from scoringType or text
+                        const typeText = p.scoringType?.displayName || p.type?.text || "";
+                        const isPenalty = /penalty/i.test(typeText) || /penalty/i.test(p.text || "");
+                        const isOwnGoal = /own goal/i.test(typeText) || /own goal/i.test(p.text || "");
+                        return {
+                            when: minute, team: teamName, homeAway,
+                            text: p.text || p.description || "Goal",
+                            score: p.awayScore != null && p.homeScore != null ? `${p.awayScore}-${p.homeScore}` : null,
+                            scorer, assist,
+                            scoringType: isPenalty ? "PK" : (isOwnGoal ? "OG" : null),
+                        };
+                    }
+
+                    // Basketball: keep simple
                     return {
-                        when: p.clock?.displayValue || (p.period?.number ? `${p.period.number}H` : ""),
-                        team: teamName, text: p.text || p.description || (p.scoringType?.displayName ? `${p.scoringType.displayName}` : "Goal"),
+                        when: p.clock?.displayValue ? `Q${p.period?.number || "?"} ${p.clock.displayValue}` : (p.period?.number ? `Q${p.period.number}` : ""),
+                        team: teamName, homeAway,
+                        text: p.text || p.description || "",
                         score: p.awayScore != null && p.homeScore != null ? `${p.awayScore}-${p.homeScore}` : null,
-                        scorer: p.athletesInvolved?.[0]?.displayName || p.scorer?.displayName || null,
+                        scorer: p.athletesInvolved?.[0]?.displayName || null,
                     };
                 });
+            }
+
+            // Linescore (per-quarter / per-period scores) - for basketball especially
+            if (compHome?.linescores && compAway?.linescores) {
+                out.linescore = {
+                    home: compHome.linescores.map((s) => s.value ?? s.displayValue ?? 0),
+                    away: compAway.linescores.map((s) => s.value ?? s.displayValue ?? 0),
+                    homeTotal: compHome.score != null ? Number(compHome.score) : null,
+                    awayTotal: compAway.score != null ? Number(compAway.score) : null,
+                };
+            }
+
+            // Top scorers / leaders for basketball
+            if (sport === "basketball" && Array.isArray(data.leaders)) {
+                const extractTopScorers = (teamLeadersData) => {
+                    const points = teamLeadersData?.find((l) => l.name === "points" || l.shortDisplayName === "PTS");
+                    if (!points || !Array.isArray(points.leaders)) return null;
+                    return points.leaders.slice(0, 3).map((p) => ({
+                        name: p.athlete?.displayName || p.athlete?.shortName || "—",
+                        value: p.displayValue || `${p.value || 0} PTS`,
+                    }));
+                };
+                const home = data.leaders.find((l) => l.homeAway === "home");
+                const away = data.leaders.find((l) => l.homeAway === "away");
+                out.topScorers = {
+                    home: extractTopScorers(home?.leaders) || [],
+                    away: extractTopScorers(away?.leaders) || [],
+                };
             }
 
             if (data.boxscore?.teams) {
@@ -837,6 +900,18 @@
                     out.lineups = lineups;
                     out.formations = formations;
                 }
+            }
+
+            // Highlights videos (ESPN may include them in summary)
+            if (Array.isArray(data.videos) && data.videos.length > 0) {
+                out.videos = data.videos.slice(0, 5).map((v) => ({
+                    id: v.id,
+                    headline: v.headline || v.title || "Highlights",
+                    description: v.description || "",
+                    thumbnail: v.thumbnail || v.images?.[0]?.url || null,
+                    duration: v.duration || null,
+                    url: v.links?.web?.href || v.links?.web?.short?.href || (v.id ? `https://www.espn.com/video/clip?id=${v.id}` : null),
+                })).filter((v) => v.url);
             }
 
             out.venue = data.gameInfo?.venue?.fullName || data.header?.competitions?.[0]?.venue?.fullName || null;
@@ -1271,30 +1346,61 @@
                                         </div>
                                     )}
 
-                                    {/* Scoring plays */}
-                                    <div style={{ marginBottom: 20 }}>
-                                        <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
-                                            {sport === "baseball" ? "得点経過" : "得点シーン"}
+                                    {/* Basketball: Linescore (Q1-Q4 + OT) */}
+                                    {sport === "basketball" && detail.linescore && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                ピリオド別スコア
+                                            </div>
+                                            <BasketballLinescore linescore={detail.linescore} accent={league.accent} game={game} />
                                         </div>
-                                        {detail.scoringPlays.length === 0 ? (
-                                            <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center", background: "#141414", border: "1px solid #1f1f1f" }}>
-                                                {game.status === "scheduled" ? "試合開始前です" : "得点データがありません"}
+                                    )}
+
+                                    {/* Basketball: Top scorers */}
+                                    {sport === "basketball" && detail.topScorers && (detail.topScorers.home.length > 0 || detail.topScorers.away.length > 0) && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                得点トップ
                                             </div>
-                                        ) : (
-                                            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                                {detail.scoringPlays.map((p, i) => (
-                                                    <div key={i} style={{ display: "grid", gridTemplateColumns: "60px 1fr auto", gap: 10, padding: "10px 12px", background: "#141414", border: "1px solid #1f1f1f", borderLeft: `2px solid ${league.accent}`, alignItems: "start" }}>
-                                                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: league.accent, fontWeight: 700, paddingTop: 2 }}>{p.when}</div>
-                                                        <div style={{ fontSize: 12, color: "#ddd", lineHeight: 1.5 }}>
-                                                            {p.scorer && <div style={{ fontWeight: 700, color: "#fff", marginBottom: 2 }}>⚽ {p.scorer}</div>}
-                                                            <div style={{ color: p.scorer ? "#888" : "#ddd", fontSize: p.scorer ? 11 : 12 }}>{p.text}</div>
+                                            <TopScorers topScorers={detail.topScorers} accent={league.accent} game={game} />
+                                        </div>
+                                    )}
+
+                                    {/* Soccer-specific scoring display */}
+                                    {sport === "soccer" && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                得点シーン
+                                            </div>
+                                            <SoccerGoalsList scoringPlays={detail.scoringPlays} accent={league.accent} game={game} />
+                                        </div>
+                                    )}
+
+                                    {/* Baseball / generic scoring plays */}
+                                    {sport !== "soccer" && sport !== "basketball" && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                {sport === "baseball" ? "得点経過" : "得点シーン"}
+                                            </div>
+                                            {detail.scoringPlays.length === 0 ? (
+                                                <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center", background: "#141414", border: "1px solid #1f1f1f" }}>
+                                                    {game.status === "scheduled" ? "試合開始前です" : "得点データがありません"}
+                                                </div>
+                                            ) : (
+                                                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                                    {detail.scoringPlays.map((p, i) => (
+                                                        <div key={i} style={{ display: "grid", gridTemplateColumns: "60px 1fr auto", gap: 10, padding: "10px 12px", background: "#141414", border: "1px solid #1f1f1f", borderLeft: `2px solid ${league.accent}`, alignItems: "start" }}>
+                                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: league.accent, fontWeight: 700, paddingTop: 2 }}>{p.when}</div>
+                                                            <div style={{ fontSize: 12, color: "#ddd", lineHeight: 1.5 }}>
+                                                                <div style={{ color: "#ddd", fontSize: 12 }}>{p.text}</div>
+                                                            </div>
+                                                            {p.score && <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#888", fontVariantNumeric: "tabular-nums", paddingTop: 2 }}>{p.score}</div>}
                                                         </div>
-                                                        {p.score && <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#888", fontVariantNumeric: "tabular-nums", paddingTop: 2 }}>{p.score}</div>}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {/* Team stats */}
                                     {detail.teamStats && (
@@ -1315,6 +1421,114 @@
                             )}
                         </div>
                     </div>
+                </div>
+            );
+        }
+
+        function SoccerGoalsList({ scoringPlays, accent, game }) {
+            if (!scoringPlays || scoringPlays.length === 0) {
+                return <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center" }}>{game.status === "scheduled" ? "試合開始前です" : "得点データがありません"}</div>;
+            }
+            return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {scoringPlays.map((p, i) => {
+                        const isHome = p.homeAway === "home";
+                        return (
+                            <div key={i} style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, padding: "12px 14px", display: "grid", gridTemplateColumns: isHome ? "1fr auto 60px" : "60px auto 1fr", gap: 10, alignItems: "center" }}>
+                                {!isHome && (
+                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: accent, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>{p.when || "—"}</div>
+                                )}
+                                <div style={{ minWidth: 0, textAlign: isHome ? "right" : "left" }}>
+                                    {p.scorer ? (
+                                        <>
+                                            <div style={{ fontWeight: 700, color: "#fff", fontSize: 14, lineHeight: 1.2, display: "flex", alignItems: "center", justifyContent: isHome ? "flex-end" : "flex-start", gap: 6 }}>
+                                                {!isHome && <span style={{ fontSize: 16 }}>⚽</span>}
+                                                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.scorer}</span>
+                                                {p.scoringType && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, fontWeight: 800, padding: "1px 5px", background: p.scoringType === "OG" ? "#aa3333" : "#666", color: "#fff", letterSpacing: 0.5 }}>{p.scoringType}</span>}
+                                                {isHome && <span style={{ fontSize: 16 }}>⚽</span>}
+                                            </div>
+                                            {p.assist && (
+                                                <div style={{ fontSize: 10, color: "#888", marginTop: 3, fontStyle: "italic" }}>
+                                                    Assist: {p.assist}
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div style={{ fontSize: 12, color: "#aaa" }}>{p.text}</div>
+                                    )}
+                                    {p.score && <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#666", marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{p.score}</div>}
+                                </div>
+                                <div style={{ fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono', monospace", textAlign: isHome ? "right" : "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {isHome ? game.homeShort : game.awayShort}
+                                </div>
+                                {isHome && (
+                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: accent, fontWeight: 800, fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{p.when || "—"}</div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        function BasketballLinescore({ linescore, accent, game }) {
+            if (!linescore || (!linescore.home?.length && !linescore.away?.length)) {
+                return <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center" }}>{game.status === "scheduled" ? "試合開始前です" : "ピリオドデータがありません"}</div>;
+            }
+            const periods = Math.max(linescore.home.length, linescore.away.length);
+            const labels = [];
+            for (let i = 0; i < periods; i++) {
+                if (i < 4) labels.push(`Q${i + 1}`);
+                else labels.push(`OT${i - 3}`);
+            }
+            const cols = `60px ${labels.map(() => "1fr").join(" ")} 50px`;
+            return (
+                <div style={{ background: "#141414", border: "1px solid #1f1f1f", overflow: "hidden" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: cols, padding: "10px 12px", borderBottom: "1px solid #1f1f1f", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, fontWeight: 700 }}>
+                        <span>TEAM</span>
+                        {labels.map((l) => <span key={l} style={{ textAlign: "center" }}>{l}</span>)}
+                        <span style={{ textAlign: "right", color: accent }}>TOT</span>
+                    </div>
+                    {[
+                        { name: game.awayShort || "AWAY", scores: linescore.away, total: linescore.awayTotal, full: game.away },
+                        { name: game.homeShort || "HOME", scores: linescore.home, total: linescore.homeTotal, full: game.home },
+                    ].map((row, ri) => (
+                        <div key={ri} style={{ display: "grid", gridTemplateColumns: cols, padding: "12px", alignItems: "center", borderBottom: ri === 0 ? "1px solid #1a1a1a" : "none" }}>
+                            <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontSize: 14, fontWeight: 800, color: "#fff", letterSpacing: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.name}</span>
+                            {labels.map((_, i) => (
+                                <span key={i} style={{ textAlign: "center", fontFamily: "'JetBrains Mono', monospace", fontSize: 14, color: "#ddd", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                                    {row.scores?.[i] ?? "—"}
+                                </span>
+                            ))}
+                            <span style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: 16, color: accent, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>
+                                {row.total ?? "—"}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function TopScorers({ topScorers, accent, game }) {
+            if (!topScorers || (!topScorers.home?.length && !topScorers.away?.length)) return null;
+            return (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    {[
+                        { name: game.awayShort, players: topScorers.away },
+                        { name: game.homeShort, players: topScorers.home },
+                    ].map((side, si) => (
+                        <div key={si} style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                            <div style={{ padding: "8px 10px", borderBottom: "1px solid #1f1f1f", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, letterSpacing: 1, fontWeight: 700 }}>{side.name}</div>
+                            {(side.players || []).length === 0 ? (
+                                <div style={{ padding: 10, fontSize: 10, color: "#555" }}>—</div>
+                            ) : side.players.map((p, i) => (
+                                <div key={i} style={{ padding: "8px 10px", borderBottom: i < side.players.length - 1 ? "1px solid #1a1a1a" : "none" }}>
+                                    <div style={{ fontSize: 11, color: "#eee", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
+                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: accent, marginTop: 2 }}>{p.value}</div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
                 </div>
             );
         }

@@ -367,7 +367,7 @@
         // Free tier: 10 requests/min, includes EPL, La Liga, Serie A, Bundesliga, Ligue 1, UCL
         // 自分のトークンに書き換えてください ↓
         // -----------------------------
-        const FOOTBALL_DATA_TOKEN = "efc3afed672b4f84aed57eec5fd237de ";
+        const FOOTBALL_DATA_TOKEN = "efc3afed672b4f84aed57eec5fd237de";
 
         // -----------------------------
         // API-Football token (get yours from https://www.api-football.com/)
@@ -665,7 +665,8 @@
             // Soccer leagues with football-data.org token configured
             if (fdId && FOOTBALL_DATA_TOKEN && FOOTBALL_DATA_TOKEN !== "YOUR_TOKEN_HERE") {
                 try {
-                    const url = `https://api.football-data.org/v4/competitions/${fdId}/scorers?limit=10`;
+                    // 修正後
+                    const url = `https://cors-anywhere.herokuapp.com/https://api.football-data.org/v4/competitions/${leagueId}/scorers`;        
                     const res = await fetch(url, { headers: { "X-Auth-Token": FOOTBALL_DATA_TOKEN } });
                     if (res.ok) {
                         const json = await res.json();

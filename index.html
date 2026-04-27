@@ -355,11 +355,111 @@
         ];
 
         const WC2026_FEATURED = [
-            { date: "2026-06-12T10:00:00+09:00", away: "South Africa", home: "Mexico", venue: "Estadio Azteca, Mexico City", tag: "OPENING", group: "Group A" },
+            { date: "2026-06-12T04:00:00+09:00", away: "South Africa", home: "Mexico", venue: "Estadio Azteca, Mexico City", tag: "OPENING", group: "Group A" },
             { date: "2026-06-15T05:00:00+09:00", away: "Japan", home: "Netherlands", venue: "AT&T Stadium, Dallas", tag: "JAPAN", group: "Group F" },
             { date: "2026-06-20T13:00:00+09:00", away: "Japan", home: "Tunisia", venue: "Estadio BBVA, Monterrey", tag: "JAPAN", group: "Group F" },
             { date: "2026-06-26T08:00:00+09:00", away: "Sweden", home: "Japan", venue: "AT&T Stadium, Dallas", tag: "JAPAN", group: "Group F" },
             { date: "2026-07-20T04:00:00+09:00", away: "TBD", home: "TBD", venue: "MetLife Stadium, New Jersey", tag: "FINAL", group: "決勝" },
+        ];
+
+        // All 72 group stage matches, JST converted
+        const WC2026_GROUPS = [
+            { id: "A", teams: ["Mexico", "South Africa", "Korea Republic", "Czechia"], matches: [
+                { date: "2026-06-12T04:00:00+09:00", away: "South Africa", home: "Mexico", venue: "Estadio Azteca, Mexico City" },
+                { date: "2026-06-12T11:00:00+09:00", away: "Czechia", home: "Korea Republic", venue: "Estadio Akron, Guadalajara" },
+                { date: "2026-06-19T01:00:00+09:00", away: "South Africa", home: "Czechia", venue: "Mercedes-Benz Stadium, Atlanta" },
+                { date: "2026-06-19T10:00:00+09:00", away: "Korea Republic", home: "Mexico", venue: "Estadio Akron, Guadalajara" },
+                { date: "2026-06-25T10:00:00+09:00", away: "Mexico", home: "Czechia", venue: "Estadio Azteca, Mexico City" },
+                { date: "2026-06-25T10:00:00+09:00", away: "Korea Republic", home: "South Africa", venue: "Estadio BBVA, Monterrey" },
+            ]},
+            { id: "B", teams: ["Canada", "Bosnia and Herzegovina", "Qatar", "Switzerland"], matches: [
+                { date: "2026-06-13T04:00:00+09:00", away: "Bosnia and Herzegovina", home: "Canada", venue: "BMO Field, Toronto" },
+                { date: "2026-06-14T04:00:00+09:00", away: "Switzerland", home: "Qatar", venue: "Levi's Stadium, Santa Clara" },
+                { date: "2026-06-19T04:00:00+09:00", away: "Bosnia and Herzegovina", home: "Switzerland", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-19T07:00:00+09:00", away: "Qatar", home: "Canada", venue: "BC Place, Vancouver" },
+                { date: "2026-06-25T04:00:00+09:00", away: "Canada", home: "Switzerland", venue: "BC Place, Vancouver" },
+                { date: "2026-06-25T04:00:00+09:00", away: "Qatar", home: "Bosnia and Herzegovina", venue: "Lumen Field, Seattle" },
+            ]},
+            { id: "C", teams: ["Brazil", "Morocco", "Haiti", "Scotland"], matches: [
+                { date: "2026-06-14T07:00:00+09:00", away: "Morocco", home: "Brazil", venue: "MetLife Stadium, New Jersey" },
+                { date: "2026-06-14T10:00:00+09:00", away: "Scotland", home: "Haiti", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-20T07:00:00+09:00", away: "Morocco", home: "Scotland", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-20T10:00:00+09:00", away: "Haiti", home: "Brazil", venue: "Lincoln Financial Field, Philadelphia" },
+                { date: "2026-06-25T07:00:00+09:00", away: "Brazil", home: "Scotland", venue: "Hard Rock Stadium, Miami" },
+                { date: "2026-06-25T07:00:00+09:00", away: "Haiti", home: "Morocco", venue: "Mercedes-Benz Stadium, Atlanta" },
+            ]},
+            { id: "D", teams: ["United States", "Paraguay", "Australia", "Türkiye"], matches: [
+                { date: "2026-06-13T10:00:00+09:00", away: "Paraguay", home: "United States", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-13T13:00:00+09:00", away: "Türkiye", home: "Australia", venue: "BC Place, Vancouver" },
+                { date: "2026-06-19T13:00:00+09:00", away: "Paraguay", home: "Türkiye", venue: "Levi's Stadium, Santa Clara" },
+                { date: "2026-06-20T04:00:00+09:00", away: "Australia", home: "United States", venue: "Lumen Field, Seattle" },
+                { date: "2026-06-26T11:00:00+09:00", away: "United States", home: "Türkiye", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-26T11:00:00+09:00", away: "Australia", home: "Paraguay", venue: "Levi's Stadium, Santa Clara" },
+            ]},
+            { id: "E", teams: ["Germany", "Curaçao", "Ivory Coast", "Ecuador"], matches: [
+                { date: "2026-06-15T02:00:00+09:00", away: "Curaçao", home: "Germany", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-15T08:00:00+09:00", away: "Ecuador", home: "Ivory Coast", venue: "Lincoln Financial Field, Philadelphia" },
+                { date: "2026-06-21T05:00:00+09:00", away: "Ivory Coast", home: "Germany", venue: "BMO Field, Toronto" },
+                { date: "2026-06-21T09:00:00+09:00", away: "Curaçao", home: "Ecuador", venue: "Arrowhead Stadium, Kansas City" },
+                { date: "2026-06-26T05:00:00+09:00", away: "Ivory Coast", home: "Curaçao", venue: "Lincoln Financial Field, Philadelphia" },
+                { date: "2026-06-26T05:00:00+09:00", away: "Germany", home: "Ecuador", venue: "MetLife Stadium, New Jersey" },
+            ]},
+            { id: "F", teams: ["Netherlands", "Japan", "Sweden", "Tunisia"], matches: [
+                { date: "2026-06-15T05:00:00+09:00", away: "Japan", home: "Netherlands", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-15T11:00:00+09:00", away: "Tunisia", home: "Sweden", venue: "Estadio BBVA, Monterrey" },
+                { date: "2026-06-21T02:00:00+09:00", away: "Sweden", home: "Netherlands", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-20T13:00:00+09:00", away: "Japan", home: "Tunisia", venue: "Estadio BBVA, Monterrey" },
+                { date: "2026-06-26T08:00:00+09:00", away: "Sweden", home: "Japan", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-26T08:00:00+09:00", away: "Netherlands", home: "Tunisia", venue: "Arrowhead Stadium, Kansas City" },
+            ]},
+            { id: "G", teams: ["Belgium", "Egypt", "Iran", "New Zealand"], matches: [
+                { date: "2026-06-16T04:00:00+09:00", away: "Egypt", home: "Belgium", venue: "Lumen Field, Seattle" },
+                { date: "2026-06-16T10:00:00+09:00", away: "New Zealand", home: "Iran", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-22T04:00:00+09:00", away: "Iran", home: "Belgium", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-22T10:00:00+09:00", away: "Egypt", home: "New Zealand", venue: "BC Place, Vancouver" },
+                { date: "2026-06-27T12:00:00+09:00", away: "Iran", home: "Egypt", venue: "Lumen Field, Seattle" },
+                { date: "2026-06-27T12:00:00+09:00", away: "Belgium", home: "New Zealand", venue: "BC Place, Vancouver" },
+            ]},
+            { id: "H", teams: ["Spain", "Cape Verde", "Saudi Arabia", "Uruguay"], matches: [
+                { date: "2026-06-16T01:00:00+09:00", away: "Cape Verde", home: "Spain", venue: "Mercedes-Benz Stadium, Atlanta" },
+                { date: "2026-06-16T07:00:00+09:00", away: "Uruguay", home: "Saudi Arabia", venue: "Hard Rock Stadium, Miami" },
+                { date: "2026-06-22T01:00:00+09:00", away: "Saudi Arabia", home: "Spain", venue: "Mercedes-Benz Stadium, Atlanta" },
+                { date: "2026-06-22T07:00:00+09:00", away: "Cape Verde", home: "Uruguay", venue: "Hard Rock Stadium, Miami" },
+                { date: "2026-06-27T09:00:00+09:00", away: "Saudi Arabia", home: "Cape Verde", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-27T09:00:00+09:00", away: "Spain", home: "Uruguay", venue: "Estadio Akron, Guadalajara" },
+            ]},
+            { id: "I", teams: ["France", "Senegal", "Iraq", "Norway"], matches: [
+                { date: "2026-06-17T04:00:00+09:00", away: "Senegal", home: "France", venue: "MetLife Stadium, New Jersey" },
+                { date: "2026-06-17T07:00:00+09:00", away: "Norway", home: "Iraq", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-23T06:00:00+09:00", away: "Iraq", home: "France", venue: "Lincoln Financial Field, Philadelphia" },
+                { date: "2026-06-23T09:00:00+09:00", away: "Senegal", home: "Norway", venue: "MetLife Stadium, New Jersey" },
+                { date: "2026-06-27T04:00:00+09:00", away: "France", home: "Norway", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-27T04:00:00+09:00", away: "Iraq", home: "Senegal", venue: "BMO Field, Toronto" },
+            ]},
+            { id: "J", teams: ["Argentina", "Algeria", "Austria", "Jordan"], matches: [
+                { date: "2026-06-17T10:00:00+09:00", away: "Algeria", home: "Argentina", venue: "Arrowhead Stadium, Kansas City" },
+                { date: "2026-06-16T13:00:00+09:00", away: "Jordan", home: "Austria", venue: "Levi's Stadium, Santa Clara" },
+                { date: "2026-06-23T02:00:00+09:00", away: "Austria", home: "Argentina", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-23T12:00:00+09:00", away: "Algeria", home: "Jordan", venue: "Levi's Stadium, Santa Clara" },
+                { date: "2026-06-28T11:00:00+09:00", away: "Argentina", home: "Jordan", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-28T11:00:00+09:00", away: "Austria", home: "Algeria", venue: "Arrowhead Stadium, Kansas City" },
+            ]},
+            { id: "K", teams: ["Portugal", "DR Congo", "Uzbekistan", "Colombia"], matches: [
+                { date: "2026-06-18T02:00:00+09:00", away: "DR Congo", home: "Portugal", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-18T11:00:00+09:00", away: "Colombia", home: "Uzbekistan", venue: "Estadio Azteca, Mexico City" },
+                { date: "2026-06-24T02:00:00+09:00", away: "Uzbekistan", home: "Portugal", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-24T11:00:00+09:00", away: "DR Congo", home: "Colombia", venue: "Estadio Akron, Guadalajara" },
+                { date: "2026-06-28T08:30:00+09:00", away: "Portugal", home: "Colombia", venue: "Hard Rock Stadium, Miami" },
+                { date: "2026-06-28T08:30:00+09:00", away: "Uzbekistan", home: "DR Congo", venue: "Mercedes-Benz Stadium, Atlanta" },
+            ]},
+            { id: "L", teams: ["England", "Croatia", "Ghana", "Panama"], matches: [
+                { date: "2026-06-18T05:00:00+09:00", away: "Croatia", home: "England", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-18T08:00:00+09:00", away: "Panama", home: "Ghana", venue: "BMO Field, Toronto" },
+                { date: "2026-06-24T05:00:00+09:00", away: "Ghana", home: "England", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-24T08:00:00+09:00", away: "Croatia", home: "Panama", venue: "BMO Field, Toronto" },
+                { date: "2026-06-28T06:00:00+09:00", away: "England", home: "Panama", venue: "MetLife Stadium, New Jersey" },
+                { date: "2026-06-28T06:00:00+09:00", away: "Ghana", home: "Croatia", venue: "Lincoln Financial Field, Philadelphia" },
+            ]},
         ];
 
         const INTL_TOURNAMENTS = [
@@ -1436,10 +1536,81 @@
                         </div>
                     )}
 
+                    {/* All groups (collapsible) */}
+                    <WorldCupGroups groups={WC2026_GROUPS} accent={accent} />
+
                     <div style={{ padding: 12, background: "rgba(255,255,255,0.02)", border: "1px dashed #2a2a2a", fontSize: 10, color: "#666", lineHeight: 1.6, fontFamily: "'JetBrains Mono', monospace" }}>
                         ※ 時刻はすべて日本時間 (JST)<br />
                         ※ 開幕後はESPN APIから全104試合のデータが自動取得されます
                     </div>
+                </div>
+            );
+        }
+
+        function WorldCupGroups({ groups, accent }) {
+            const [expandedId, setExpandedId] = useState("F"); // Default: Japan's group expanded
+            const days = ["日","月","火","水","木","金","土"];
+            const fmtDate = (iso) => {
+                const d = new Date(iso);
+                return `${pad(d.getMonth()+1)}/${pad(d.getDate())} (${days[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            };
+            const now = new Date();
+
+            return (
+                <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: 2, color: accent, marginBottom: 8, textTransform: "uppercase" }}>
+                        📊 全グループ日程
+                    </div>
+                    {groups.map((g) => {
+                        const isExpanded = expandedId === g.id;
+                        const hasJapan = g.teams.includes("Japan");
+                        return (
+                            <div key={g.id} style={{ marginBottom: 4 }}>
+                                <button
+                                    onClick={() => setExpandedId(isExpanded ? null : g.id)}
+                                    className="clickable"
+                                    style={{ width: "100%", background: isExpanded ? "#1a1a1a" : "#141414", border: "1px solid #1f1f1f", borderLeft: hasJapan ? "3px solid #E5253E" : `3px solid ${isExpanded ? accent : "#333"}`, padding: "10px 14px", textAlign: "left", color: "inherit", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, cursor: "pointer" }}
+                                >
+                                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
+                                        <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 900, fontSize: 18, color: hasJapan ? "#E5253E" : (isExpanded ? accent : "#aaa"), letterSpacing: 1, minWidth: 22 }}>
+                                            {g.id}
+                                        </span>
+                                        <div style={{ fontSize: 11, color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "'Manrope', sans-serif" }}>
+                                            {g.teams.map((t) => t === "Japan" ? "🇯🇵 Japan" : t).join(" · ")}
+                                        </div>
+                                    </div>
+                                    <span style={{ color: isExpanded ? accent : "#555", fontSize: 12, fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>
+                                        {isExpanded ? "▼" : "▶"}
+                                    </span>
+                                </button>
+                                {isExpanded && (
+                                    <div style={{ background: "#0d0d0d", border: "1px solid #1f1f1f", borderTop: "none", padding: "8px 12px" }}>
+                                        {g.matches
+                                            .slice()
+                                            .sort((a, b) => new Date(a.date) - new Date(b.date))
+                                            .map((m, i) => {
+                                                const isJapanMatch = m.away === "Japan" || m.home === "Japan";
+                                                const isPast = new Date(m.date) < now;
+                                                return (
+                                                    <div key={i} style={{ padding: "8px 0", borderBottom: i < g.matches.length - 1 ? "1px solid #1a1a1a" : "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, opacity: isPast ? 0.45 : 1 }}>
+                                                        <div style={{ minWidth: 0, flex: 1 }}>
+                                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: isJapanMatch ? "#E5253E" : "#666", letterSpacing: 0.5, marginBottom: 3 }}>
+                                                                {fmtDate(m.date)}{isPast ? " · 終了" : ""}
+                                                            </div>
+                                                            <div style={{ fontSize: 12, color: "#ddd", fontFamily: "'Manrope', sans-serif", fontWeight: isJapanMatch ? 700 : 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                                                {m.away === "Japan" ? "🇯🇵 " : ""}{m.away}
+                                                                <span style={{ color: "#555", margin: "0 6px" }}>vs</span>
+                                                                {m.home === "Japan" ? "🇯🇵 " : ""}{m.home}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             );
         }

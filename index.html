@@ -2330,22 +2330,53 @@
                                 {!current.npbFallback && view === "scores" && (
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, background: "#111", padding: "8px 12px", borderRadius: 4, border: "1px solid #1f1f1f", gap: 8 }}>
                                         <button onClick={() => setScoreDateOffset(o => o - 1)} style={{ background: "none", border: "none", color: league.accent, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 12, padding: "4px 8px", flexShrink: 0 }}>← PREV</button>
-                                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 0, flex: 1 }}>
-                                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#eee", whiteSpace: "nowrap" }}>
-                                                {(() => {
+                                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 0, flex: 1, position: "relative" }}>
+                                            <button
+                                                onClick={(e) => {
+                                                    const picker = e.currentTarget.parentElement.querySelector('input[type="date"]');
+                                                    if (!picker) return;
+                                                    if (typeof picker.showPicker === 'function') {
+                                                        try { picker.showPicker(); } catch { picker.click(); }
+                                                    } else { picker.click(); }
+                                                }}
+                                                style={{ background: "none", border: "1px dashed transparent", padding: "2px 8px", display: "flex", alignItems: "center", gap: 6, color: "#eee", fontFamily: "'JetBrains Mono', monospace", fontSize: 12, whiteSpace: "nowrap", cursor: "pointer" }}
+                                                onMouseEnter={(e) => e.currentTarget.style.borderColor = league.accent}
+                                                onMouseLeave={(e) => e.currentTarget.style.borderColor = "transparent"}
+                                            >
+                                                📅 {(() => {
                                                     const d = new Date();
                                                     d.setDate(d.getDate() + scoreDateOffset);
                                                     const day = ["SUN","MON","TUE","WED","THU","FRI","SAT"][d.getDay()];
                                                     return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${day}`;
                                                 })()}
-                                            </span>
+                                            </button>
+                                            <input
+                                                type="date"
+                                                value={(() => {
+                                                    const d = new Date();
+                                                    d.setDate(d.getDate() + scoreDateOffset);
+                                                    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+                                                })()}
+                                                onChange={(e) => {
+                                                    if (!e.target.value) return;
+                                                    const sel = new Date(e.target.value + 'T00:00:00');
+                                                    const tod = new Date();
+                                                    tod.setHours(0,0,0,0);
+                                                    sel.setHours(0,0,0,0);
+                                                    const diff = Math.round((sel - tod) / 86400000);
+                                                    setScoreDateOffset(diff);
+                                                }}
+                                                style={{ position: "absolute", opacity: 0, width: 1, height: 1, pointerEvents: "none" }}
+                                                tabIndex={-1}
+                                                aria-hidden="true"
+                                            />
                                             {scoreDateOffset !== 0 && (
                                                 <button onClick={() => setScoreDateOffset(0)} style={{ background: league.accent, border: "none", color: "#0a0a0a", fontFamily: "'JetBrains Mono', monospace", fontWeight: 800, fontSize: 9, letterSpacing: 1, padding: "3px 10px", borderRadius: 2, cursor: "pointer" }}>
                                                     ⊙ TODAY
                                                 </button>
                                             )}
                                             {scoreDateOffset === 0 && (
-                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: "#555", letterSpacing: 1 }}>TODAY</span>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: "#555", letterSpacing: 1 }}>TODAY · TAP DATE TO JUMP</span>
                                             )}
                                         </div>
                                         <button onClick={() => setScoreDateOffset(o => o + 1)} style={{ background: "none", border: "none", color: league.accent, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 12, padding: "4px 8px", flexShrink: 0 }}>NEXT →</button>

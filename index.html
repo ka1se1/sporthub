@@ -363,15 +363,22 @@
         };
 
         // -----------------------------
+        // football-data.org API token (get yours from https://www.football-data.org/client/register)
+        // Free tier: 10 requests/min, includes EPL, La Liga, Serie A, Bundesliga, Ligue 1, UCL
+        // 自分のトークンに書き換えてください ↓
+        // -----------------------------
+        const FOOTBALL_DATA_TOKEN = "YOUR_TOKEN_HERE";
+
+        // -----------------------------
         // League configs
         // -----------------------------
         const SOCCER_LEAGUES = [
-            { id: "epl", short: "EPL", name: "Premier League", country: "England", espn: "soccer/eng.1", apiFootballId: 39, broadcasts: ["SPOTV NOW", "U-NEXT"] },
-            { id: "laliga", short: "LIGA", name: "La Liga", country: "Spain", espn: "soccer/esp.1", apiFootballId: 140, broadcasts: ["WOWOW", "U-NEXT"] },
-            { id: "seriea", short: "SERA", name: "Serie A", country: "Italy", espn: "soccer/ita.1", apiFootballId: 135, broadcasts: ["DAZN"] },
-            { id: "bundesliga", short: "BUND", name: "Bundesliga", country: "Germany", espn: "soccer/ger.1", apiFootballId: 78, broadcasts: ["SPOTV NOW", "スカパー!"] },
-            { id: "ligue1", short: "L1", name: "Ligue 1", country: "France", espn: "soccer/fra.1", apiFootballId: 61, broadcasts: ["DAZN", "ABEMA"] },
-            { id: "ucl", short: "UCL", name: "UEFA Champions League", country: "Europe", espn: "soccer/uefa.champions", apiFootballId: 2, broadcasts: ["WOWOW", "U-NEXT"] },
+            { id: "epl",        short: "EPL",  name: "Premier League",        country: "England", espn: "soccer/eng.1",          apiFootballId: 39,  fdId: "PL",  broadcasts: ["SPOTV NOW", "U-NEXT"] },
+            { id: "laliga",     short: "LIGA", name: "La Liga",               country: "Spain",   espn: "soccer/esp.1",          apiFootballId: 140, fdId: "PD",  broadcasts: ["WOWOW", "U-NEXT"] },
+            { id: "seriea",     short: "SERA", name: "Serie A",               country: "Italy",   espn: "soccer/ita.1",          apiFootballId: 135, fdId: "SA",  broadcasts: ["DAZN"] },
+            { id: "bundesliga", short: "BUND", name: "Bundesliga",            country: "Germany", espn: "soccer/ger.1",          apiFootballId: 78,  fdId: "BL1", broadcasts: ["SPOTV NOW", "スカパー!"] },
+            { id: "ligue1",     short: "L1",   name: "Ligue 1",               country: "France",  espn: "soccer/fra.1",          apiFootballId: 61,  fdId: "FL1", broadcasts: ["DAZN", "ABEMA"] },
+            { id: "ucl",        short: "UCL",  name: "UEFA Champions League", country: "Europe",  espn: "soccer/uefa.champions", apiFootballId: 2,   fdId: "CL",  broadcasts: ["WOWOW", "U-NEXT"] },
         ];
 
         const WC2026_FEATURED = [
@@ -621,21 +628,20 @@
             if (!res.ok) throw new Error(`ESPN ${res.status}`);
             return res.json();
         }
-        async function fetchLeaders(espnPath, sport) {
+        async function fetchLeaders(espnPath, sport, fdId) {
             // MLB: use official MLB Stats API (has CORS headers, reliable)
             if (espnPath === "baseball/mlb") {
                 const season = new Date().getFullYear();
-                // Fetch multiple stat categories in parallel
                 const categories = [
-                    { key: "homeRuns",       label: "本塁打 (HR)",      group: "hitting",  abbr: "HR" },
-                    { key: "battingAverage", label: "打率 (AVG)",       group: "hitting",  abbr: "AVG" },
-                    { key: "runsBattedIn",   label: "打点 (RBI)",       group: "hitting",  abbr: "RBI" },
-                    { key: "hits",           label: "安打 (H)",         group: "hitting",  abbr: "H" },
-                    { key: "stolenBases",    label: "盗塁 (SB)",        group: "hitting",  abbr: "SB" },
-                    { key: "wins",           label: "勝利 (W)",         group: "pitching", abbr: "W" },
-                    { key: "earnedRunAverage", label: "防御率 (ERA)",   group: "pitching", abbr: "ERA" },
-                    { key: "strikeouts",     label: "奪三振 (K)",       group: "pitching", abbr: "K" },
-                    { key: "saves",          label: "セーブ (SV)",      group: "pitching", abbr: "SV" },
+                    { key: "homeRuns",         label: "本塁打 (HR)",   group: "hitting",  abbr: "HR" },
+                    { key: "battingAverage",   label: "打率 (AVG)",    group: "hitting",  abbr: "AVG" },
+                    { key: "runsBattedIn",     label: "打点 (RBI)",    group: "hitting",  abbr: "RBI" },
+                    { key: "hits",             label: "安打 (H)",      group: "hitting",  abbr: "H" },
+                    { key: "stolenBases",      label: "盗塁 (SB)",     group: "hitting",  abbr: "SB" },
+                    { key: "wins",             label: "勝利 (W)",      group: "pitching", abbr: "W" },
+                    { key: "earnedRunAverage", label: "防御率 (ERA)",  group: "pitching", abbr: "ERA" },
+                    { key: "strikeouts",       label: "奪三振 (K)",    group: "pitching", abbr: "K" },
+                    { key: "saves",            label: "セーブ (SV)",   group: "pitching", abbr: "SV" },
                 ];
                 const results = await Promise.allSettled(categories.map(async (c) => {
                     const url = `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=${c.key}&season=${season}&limit=5&statGroup=${c.group}&sportId=1`;
@@ -649,22 +655,60 @@
                 return { mlbStats: true, items: ok };
             }
 
-            // NBA: try seasonleaders endpoint (has CORS headers)
-            if (espnPath === "basketball/nba") {
-                const season = new Date().getFullYear();
-                const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/seasonleaders?season=${season}`;
+            // Soccer leagues with football-data.org token configured
+            if (fdId && FOOTBALL_DATA_TOKEN && FOOTBALL_DATA_TOKEN !== "YOUR_TOKEN_HERE") {
                 try {
-                    const res = await fetch(url);
-                    if (res.ok) return await res.json();
-                } catch {}
-                // Fall through to standard /leaders
+                    const url = `https://api.football-data.org/v4/competitions/${fdId}/scorers?limit=10`;
+                    const res = await fetch(url, { headers: { "X-Auth-Token": FOOTBALL_DATA_TOKEN } });
+                    if (res.ok) {
+                        const json = await res.json();
+                        return { footballDataScorers: true, data: json };
+                    }
+                    // If 403/429, fall through to external links below
+                } catch (e) { /* fall through */ }
             }
 
-            // Standard endpoint - works for soccer leagues
-            const url = `https://site.api.espn.com/apis/site/v2/sports/${espnPath}/leaders`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`ESPN ${res.status}`);
-            return res.json();
+            // NBA, Soccer leagues, etc.: ESPN's leaders endpoints don't have CORS headers
+            // and most return 404. Return a special marker for the UI to show external links.
+            const externalUrls = {
+                "basketball/nba": "https://www.espn.com/nba/statistics",
+                "soccer/eng.1":   "https://www.espn.com/soccer/stats/_/league/ENG.1",
+                "soccer/esp.1":   "https://www.espn.com/soccer/stats/_/league/ESP.1",
+                "soccer/ita.1":   "https://www.espn.com/soccer/stats/_/league/ITA.1",
+                "soccer/ger.1":   "https://www.espn.com/soccer/stats/_/league/GER.1",
+                "soccer/fra.1":   "https://www.espn.com/soccer/stats/_/league/FRA.1",
+                "soccer/uefa.champions": "https://www.espn.com/soccer/stats/_/league/UEFA.CHAMPIONS",
+                "soccer/jpn.1":   "https://www.espn.com/soccer/stats/_/league/JPN.1",
+            };
+            const altUrls = {
+                "basketball/nba": [
+                    { name: "NBA公式", url: "https://www.nba.com/stats/leaders" },
+                    { name: "Basketball Reference", url: "https://www.basketball-reference.com/leaders/" },
+                ],
+                "soccer/eng.1": [
+                    { name: "Premier League公式", url: "https://www.premierleague.com/stats/top/players/goals" },
+                    { name: "FotMob", url: "https://www.fotmob.com/leagues/47/stats/season/2025-2026/players/goals/premier-league-players" },
+                ],
+                "soccer/esp.1": [
+                    { name: "LaLiga公式", url: "https://www.laliga.com/en-GB/stats/laliga-easports/players/goals" },
+                ],
+                "soccer/ita.1": [
+                    { name: "Serie A公式", url: "https://www.legaseriea.it/en/serie-a/stats/players-rankings" },
+                ],
+                "soccer/ger.1": [
+                    { name: "Bundesliga公式", url: "https://www.bundesliga.com/en/bundesliga/stats/players" },
+                ],
+                "soccer/fra.1": [
+                    { name: "Ligue 1公式", url: "https://www.ligue1.com/stats/players" },
+                ],
+                "soccer/uefa.champions": [
+                    { name: "UEFA公式", url: "https://www.uefa.com/uefachampionsleague/statistics/players/" },
+                ],
+                "soccer/jpn.1": [
+                    { name: "Jリーグ公式", url: "https://www.jleague.jp/stats/" },
+                ],
+            };
+            return { externalOnly: true, primary: externalUrls[espnPath], alt: altUrls[espnPath] || [] };
         }
         async function fetchSummary(espnPath, eventId) {
             const url = `https://site.api.espn.com/apis/site/v2/sports/${espnPath}/summary?event=${eventId}`;
@@ -757,6 +801,48 @@
 
         function parseLeaders(data, sport) {
             if (!data) return [];
+
+            // football-data.org scorers
+            if (data.footballDataScorers && data.data?.scorers) {
+                const scorers = data.data.scorers;
+                if (scorers.length === 0) return [];
+                const goalEntries = scorers.slice(0, 10).map((s) => ({
+                    name: s.player?.name || "—",
+                    headshot: null,
+                    team: s.team?.shortName || s.team?.name || "",
+                    teamLogo: s.team?.crest || null,
+                    value: String(s.goals ?? "—"),
+                }));
+                const result = [{ name: "得点ランキング (Goals)", abbr: "GLS", entries: goalEntries }];
+                const withAssists = scorers.filter((s) => s.assists != null && s.assists > 0);
+                if (withAssists.length > 0) {
+                    const assistEntries = withAssists.slice().sort((a, b) => (b.assists - a.assists)).slice(0, 10).map((s) => ({
+                        name: s.player?.name || "—",
+                        headshot: null,
+                        team: s.team?.shortName || s.team?.name || "",
+                        teamLogo: s.team?.crest || null,
+                        value: String(s.assists),
+                    }));
+                    result.push({ name: "アシスト (Assists)", abbr: "AST", entries: assistEntries });
+                }
+                const withPenalties = scorers.filter((s) => s.penalties != null && s.penalties > 0);
+                if (withPenalties.length > 0) {
+                    const pkEntries = withPenalties.slice().sort((a, b) => (b.penalties - a.penalties)).slice(0, 10).map((s) => ({
+                        name: s.player?.name || "—",
+                        headshot: null,
+                        team: s.team?.shortName || s.team?.name || "",
+                        teamLogo: s.team?.crest || null,
+                        value: String(s.penalties),
+                    }));
+                    result.push({ name: "PK得点 (Penalties)", abbr: "PK", entries: pkEntries });
+                }
+                return result;
+            }
+
+            // External-only fallback (NBA, soccer leagues)
+            if (data.externalOnly) {
+                return { __external: true, primary: data.primary, alt: data.alt };
+            }
 
             // MLB Stats API (official) — fetched as { mlbStats: true, items: [{ meta, data }, ...] }
             if (data.mlbStats && Array.isArray(data.items)) {
@@ -1341,6 +1427,42 @@
         }
 
         function LeadersBoard({ categories, accent }) {
+            // External fallback (when API is blocked by CORS)
+            if (categories && categories.__external) {
+                const links = [];
+                if (categories.primary) links.push({ name: "ESPN統計", url: categories.primary, primary: true });
+                links.push(...(categories.alt || []));
+                return (
+                    <div>
+                        <div style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, padding: 20, marginBottom: 12 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                                <div style={{ width: 36, height: 36, borderRadius: 4, background: `${accent}20`, border: `1px solid ${accent}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>📊</div>
+                                <div>
+                                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 18, color: "#fff", letterSpacing: 1, lineHeight: 1.1 }}>個人成績ランキング</div>
+                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, marginTop: 4 }}>EXTERNAL SOURCES</div>
+                                </div>
+                            </div>
+                            <div style={{ fontSize: 12, color: "#aaa", lineHeight: 1.6 }}>
+                                このリーグの個人成績データは無料の公開APIで安定提供されていないため、
+                                信頼できる外部ソースから確認できます。
+                            </div>
+                        </div>
+
+                        {links.map((link, i) => (
+                            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="clickable" style={{ display: "block", background: "#141414", border: "1px solid #1f1f1f", padding: "14px 16px", marginBottom: 6, textDecoration: "none", color: "inherit" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                                        {link.primary && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, fontWeight: 800, padding: "2px 6px", border: `1px solid ${accent}`, letterSpacing: 1 }}>★</span>}
+                                        <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: 1 }}>{link.name}</div>
+                                    </div>
+                                    <div style={{ color: accent, flexShrink: 0 }}><I.Ext size={16} /></div>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                );
+            }
+
             if (!categories || categories.length === 0) return (
                 <div style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, padding: 20, textAlign: "center" }}>
                     <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 18, color: "#fff", letterSpacing: 1, marginBottom: 8 }}>📊 個人成績</div>
@@ -2258,10 +2380,10 @@
 
             const effective = useMemo(() => {
                 return subLeague ? {
-                    name: subLeague.name, espn: subLeague.espn, isMlbOfficial: subLeague.isMlbOfficial, isNpb: subLeague.isNpb, apiFootballId: subLeague.apiFootballId, broadcasts: subLeague.broadcasts, sport: subLeague.sport || league.sport, short: subLeague.short, fallbackUrl: subLeague.fallbackUrl,
+                    name: subLeague.name, espn: subLeague.espn, isMlbOfficial: subLeague.isMlbOfficial, isNpb: subLeague.isNpb, apiFootballId: subLeague.apiFootballId, fdId: subLeague.fdId, broadcasts: subLeague.broadcasts, sport: subLeague.sport || league.sport, short: subLeague.short, fallbackUrl: subLeague.fallbackUrl,
                     featuredMatches: subLeague.featuredMatches, tournamentStart: subLeague.tournamentStart, tournamentEnd: subLeague.tournamentEnd,
                 } : {
-                    name: league.name, espn: league.espn, isMlbOfficial: league.isMlbOfficial, isNpb: league.isNpb, apiFootballId: league.apiFootballId, broadcasts: league.broadcasts, sport: league.sport, short: league.short, fallbackUrl: league.fallbackUrl,
+                    name: league.name, espn: league.espn, isMlbOfficial: league.isMlbOfficial, isNpb: league.isNpb, apiFootballId: league.apiFootballId, fdId: league.fdId, broadcasts: league.broadcasts, sport: league.sport, short: league.short, fallbackUrl: league.fallbackUrl,
                 };
             }, [league, subLeague]);
 
@@ -2275,6 +2397,7 @@
             const effMlb = effective.isMlbOfficial;
             const effNpb = effective.isNpb;
             const effApiFb = effective.apiFootballId;
+            const effFdId = effective.fdId;
             const effSport = effective.sport;
             const effBroadcasts = effective.broadcasts;
 
@@ -2315,7 +2438,7 @@
                             const raw = await fetchStandings(effEspn);
                             result = { groups: parseStandings(raw, effSport) };
                         } else if (view === "leaders") {
-                            const raw = await fetchLeaders(effEspn, effSport);
+                            const raw = await fetchLeaders(effEspn, effSport, effFdId);
                             result = { categories: parseLeaders(raw, effSport) };
                         } else {
                             // scores or schedule
@@ -2332,7 +2455,7 @@
                 } finally {
                     setLoading(false);
                 }
-            }, [cacheKey, effEspn, effMlb, effNpb, effApiFb, effSport, effBroadcasts, view, scoreDateOffset]);
+            }, [cacheKey, effEspn, effMlb, effNpb, effApiFb, effFdId, effSport, effBroadcasts, view, scoreDateOffset]);
 
             useEffect(() => { load(); }, [load]);
 

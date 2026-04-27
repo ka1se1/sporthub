@@ -922,81 +922,67 @@
         function parseMlbSummary(data) {
             const liveData = data.liveData;
             const gameData = data.gameData;
-            const homeName = gameData?.teams?.home?.name;
-            const awayName = gameData?.teams?.away?.name;
 
             const allPlays = liveData?.plays?.allPlays || [];
+            
+            // ★以前のようにバッターやピッチャーの情報を追加し、🏏や🦸のアイコンが出るように復活させました！
             const scoringPlays = allPlays.filter(p => p.about?.isScoringPlay).map(p => {
-                const isAway = p.about.halfInning === 'top';
-                const teamName = isAway ? awayName : homeName;
-                // result.event = "Home Run", "Single", "Double", "Walk", "Sac Fly", "Wild Pitch", etc.
-                const eventType = p.result?.event || "";
-                const desc = p.result?.description || "";
-                // Find batter & responsible pitcher
-                const batter = p.matchup?.batter?.fullName || null;
-                const pitcher = p.matchup?.pitcher?.fullName || null;
-                const isHomeRun = /home run/i.test(eventType);
-                const isGrandSlam = /grand slam/i.test(desc);
+                const isHomeRun = p.result?.event === 'Home Run';
                 return {
-                    when: `${isAway ? '表' : '裏'}${p.about.inning}回`,
-                    inning: p.about.inning,
-                    halfInning: p.about.halfInning,
-                    team: teamName, homeAway: isAway ? "away" : "home",
-                    text: desc,
+                    when: `${p.about.halfInning === 'top' ? '表' : '裏'} ${p.about.inning}回`,
+                    team: p.about.halfInning === 'top' ? gameData?.teams?.away?.name : gameData?.teams?.home?.name,
+                    text: p.result?.description || "",
                     score: p.result ? `${p.result.awayScore}-${p.result.homeScore}` : null,
-                    eventType,
-                    batter,
-                    pitcher,
-                    isHomeRun,
-                    isGrandSlam,
+                    batter: p.matchup?.batter?.fullName || null,
+                    pitcher: p.matchup?.pitcher?.fullName || null,
+                    highlight: isHomeRun // これが 🦸 アイコンのトリガーになります
                 };
             });
 
+            // ★チームスタッツ（HITS, ERRORSなどが元の表示と合うように大文字小文字の両方に対応）
             const homeBox = liveData?.boxscore?.teams?.home;
             const awayBox = liveData?.boxscore?.teams?.away;
 
             const toStats = (box) => {
                 const b = box?.teamStats?.batting || {};
                 const f = box?.teamStats?.fielding || {};
-                return { hits: b.hits ?? 0, errors: f.errors ?? 0, homeRuns: b.homeRuns ?? 0, strikeOuts: b.strikeOuts ?? 0 };
+                return { 
+                    "Hits": b.hits ?? 0, "HITS": b.hits ?? 0, "hits": b.hits ?? 0,
+                    "Errors": f.errors ?? 0, "ERRORS": f.errors ?? 0, "errors": f.errors ?? 0,
+                    "HR": b.homeRuns ?? 0, "Home Runs": b.homeRuns ?? 0,
+                    "SO": b.strikeOuts ?? 0, "Strikeouts": b.strikeOuts ?? 0
+                };
             };
 
-            const teamStats = homeBox && awayBox ? { home: toStats(homeBox), away: toStats(awayBox), homeName, awayName } : null;
+            const teamStats = homeBox && awayBox ? { home: toStats(homeBox), away: toStats(awayBox), homeName: gameData?.teams?.home?.name, awayName: gameData?.teams?.away?.name } : null;
 
-            // Linescore (MLB official format: per-inning runs, hits, errors)
-            const ls = liveData?.linescore;
-            let linescore = null;
-            if (ls && Array.isArray(ls.innings)) {
-                const homeRuns = ls.innings.map((inn) => inn.home?.runs);
-                const awayRuns = ls.innings.map((inn) => inn.away?.runs);
-                linescore = {
-                    home: homeRuns,
-                    away: awayRuns,
-                    homeTotal: ls.teams?.home?.runs ?? null,
-                    awayTotal: ls.teams?.away?.runs ?? null,
-                    homeHits: ls.teams?.home?.hits ?? null,
-                    awayHits: ls.teams?.away?.hits ?? null,
-                    homeErrors: ls.teams?.home?.errors ?? null,
-                    awayErrors: ls.teams?.away?.errors ?? null,
-                    currentInning: ls.currentInning,
-                    inningHalf: ls.inningHalf, // "Top" or "Bottom"
-                    isComplete: gameData?.status?.abstractGameState === "Final",
-                };
-            }
-
+            // ★スタメン情報（顔写真付き）
             const getLineup = (box) => {
                 const order = box?.battingOrder || [];
                 if (order.length === 0) return null;
                 return order.map(id => {
                     const player = box.players[`ID${id}`];
-                    return { name: player?.person?.fullName || 'Unknown', position: player?.position?.abbreviation || '', number: '' };
+                    return { 
+                        name: player?.person?.fullName || 'Unknown', 
+                        shortName: player?.person?.lastName || player?.person?.fullName || 'Unknown',
+                        position: player?.position?.abbreviation || '', 
+                        number: player?.jerseyNumber || '',
+                        headshot: `https://img.mlbstatic.com/mlb-photos/alphabetic/atmlb/60x60/${id}.png`
+                    };
                 });
             };
             const awayLineup = getLineup(awayBox);
             const homeLineup = getLineup(homeBox);
             const lineups = awayLineup && homeLineup ? { home: homeLineup, away: awayLineup } : null;
 
-            return { scoringPlays, teamStats, lineups, formations: null, venue: gameData?.venue?.name || null, attendance: gameData?.gameInfo?.attendance || null, linescore };
+            return { 
+                scoringPlays, 
+                teamStats, 
+                lineups, 
+                formations: null, 
+                venue: gameData?.venue?.name || null, 
+                attendance: gameData?.gameInfo?.attendance || null 
+            };
         }
 
 

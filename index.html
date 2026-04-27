@@ -136,6 +136,25 @@
             min-height: 100vh;
             min-height: 100dvh;
             position: relative;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Sticky header with iPhone notch / status bar safe area */
+        .safe-header {
+            padding-top: env(safe-area-inset-top) !important;
+        }
+
+        /* Background extension behind status bar (so blur looks correct) */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: env(safe-area-inset-top);
+            background: #0a0a0a;
+            z-index: 100;
+            pointer-events: none;
         }
 
         @media (min-width: 600px) {
@@ -168,6 +187,7 @@
             background: #0a0a0a;
             border-top: 1px solid #1f1f1f;
             animation: slideUpBig 0.28s cubic-bezier(0.2, 0.8, 0.25, 1);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         @media (min-width: 600px) {
@@ -1810,7 +1830,7 @@
 
             return (
                 <div className="app-shell fade-in">
-                    <div style={{ position: "sticky", top: 0, zIndex: 10, background: "rgba(10,10,10,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderBottom: "1px solid #1a1a1a" }}>
+                    <div className="safe-header" style={{ position: "sticky", top: 0, zIndex: 10, background: "rgba(10,10,10,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderBottom: "1px solid #1a1a1a" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 16px 12px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                                 <div style={{ width: 24, height: 24, borderRadius: 4, background: league.accent, display: "flex", alignItems: "center", justifyContent: "center", color: "#0a0a0a" }}>

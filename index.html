@@ -7,7 +7,2553 @@
     <meta name="theme-color" content="#0a0a0a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ScoreHub" /<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="ScoreHub" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial Black,sans-serif' font-size='60' font-weight='900' fill='%23FF4D2E' text-anchor='middle' dominant-baseline='central'%3ESH%3C/text%3E%3C/svg%3E" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial Black,sans-serif' font-size='14' font-weight='900' fill='%23FF4D2E' text-anchor='middle' dominant-baseline='central'%3ESH%3C/text%3E%3C/svg%3E" />
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22ScoreHub%22%2C%22short_name%22%3A%22ScoreHub%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230a0a0a%22%2C%22theme_color%22%3A%22%230a0a0a%22%2C%22orientation%22%3A%22portrait%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2527%2520viewBox%253D%25270%25200%2520512%2520512%2527%253E%253Crect%2520width%253D%2527512%2527%2520height%253D%2527512%2527%2520rx%253D%2527102%2527%2520fill%253D%2527%25230a0a0a%2527%252F%253E%253Ctext%2520x%253D%252750%2525%2527%2520y%253D%252750%2525%2527%2520font-family%253D%2527Arial%2520Black%252Csans-serif%2527%2520font-size%253D%2527180%2527%2520font-weight%253D%2527900%2527%2520fill%253D%2527%2523FF4D2E%2527%2520text-anchor%253D%2527middle%2527%2520dominant-baseline%253D%2527central%2527%253ESH%253C%252Ftext%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%5D%7D" />
+    <title>ScoreHub — Live Sports</title>
+    <meta name="description"
+        content="MLB, NPB, 海外サッカー, 国際大会, J.League, NBA, standings, leaders, schedules." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;700;800;900&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #050505;
+            color: #eee;
+            font-family: "Manrope", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+        }
+
+        button:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUpBig {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #161616 0%, #1f1f1f 50%, #161616 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.6s ease-in-out infinite;
+            border-radius: 2px;
+        }
+
+        .skeleton-card {
+            background: #141414;
+            border: 1px solid #1f1f1f;
+            border-left: 3px solid;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+        .loading-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: breathe 1.4s ease-in-out infinite;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        .scrollx::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollx {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .fade-in {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .grain {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 3px 3px;
+        }
+
+        .app-shell {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            min-height: 100vh;
+            min-height: 100dvh;
+            position: relative;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Sticky header with iPhone notch / status bar safe area */
+        .safe-header {
+            padding-top: env(safe-area-inset-top) !important;
+        }
+
+        /* Background extension behind status bar (so blur looks correct) */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: env(safe-area-inset-top);
+            background: #0a0a0a;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        @media (min-width: 600px) {
+            .app-shell {
+                box-shadow: 0 0 80px rgba(0, 0, 0, 0.7);
+                border-left: 1px solid #161616;
+                border-right: 1px solid #161616;
+            }
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 50;
+            animation: fadeIn 0.2s ease-out;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .modal-sheet {
+            width: 100%;
+            max-width: 480px;
+            max-height: 92vh;
+            max-height: 92dvh;
+            overflow-y: auto;
+            background: #0a0a0a;
+            border-top: 1px solid #1f1f1f;
+            animation: slideUpBig 0.28s cubic-bezier(0.2, 0.8, 0.25, 1);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        @media (min-width: 600px) {
+            .modal-backdrop {
+                align-items: center;
+            }
+            .modal-sheet {
+                max-height: 88vh;
+                border: 1px solid #1f1f1f;
+            }
+        }
+
+        .clickable {
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+        }
+
+        .clickable:active {
+            transform: scale(0.99);
+        }
+
+        /* サッカーピッチ用のスタイル */
+        .soccer-pitch {
+            background: linear-gradient(180deg, #163e20 0%, #1a472a 100%);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            position: relative;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            justify-content: space-around;
+            min-height: 280px;
+            overflow: hidden;
+        }
+        .pitch-lines::before {
+            content: "";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 40px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 40px;
+            pointer-events: none;
+        }
+        .pitch-lines::after {
+            content: "";
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 40px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 40px;
+            pointer-events: none;
+        }
+        .pitch-center-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-50%);
+        }
+        .pitch-center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" data-presets="env,react">
+        // ==========================================
+        // ▼ サッカーの得点王を見るためのAPIキー設定 ▼
+        // ==========================================
+        // https://dashboard.api-football.com/ で取得したキーを下の "" の中に入れてください。
+        // ※入れなくてもその他のスコアや機能はすべて動きます！
+        const API_FOOTBALL_KEY = "e4fe4867c6a070bab5957bc68c9f9a50";
+        // ==========================================
+
+        const { useState, useEffect, useCallback, useMemo, useRef } = React;
+
+        // -----------------------------
+        // Icons
+        // -----------------------------
+        const I = {
+            Refresh: ({ size = 14, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v5" />
+                </svg>
+            ),
+            Calendar: ({ size = 14, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+            ),
+            Trophy: ({ size = 14, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" />
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                </svg>
+            ),
+            Activity: ({ size = 14, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+            ),
+            Star: ({ size = 14, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+            ),
+            Alert: ({ size = 16, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+            ),
+            Tv: ({ size = 10, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <rect x="2" y="7" width="20" height="15" rx="2" ry="2" /><polyline points="17 2 12 7 7 2" />
+                </svg>
+            ),
+            Ext: ({ size = 12, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+            ),
+            Close: ({ size = 18, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            ),
+            Ball: ({ size = 12, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" />
+                </svg>
+            ),
+            User: ({ size = 14, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                </svg>
+            ),
+            Heart: ({ size = 14, filled = false, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+            ),
+            Search: ({ size = 14, ...p }) => (
+                <svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
+                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+            )
+        };
+
+        // -----------------------------
+        // League configs
+        // -----------------------------
+        const SOCCER_LEAGUES = [
+            { id: "epl", short: "EPL", name: "Premier League", country: "England", espn: "soccer/eng.1", apiFootballId: 39, broadcasts: ["SPOTV NOW", "U-NEXT"] },
+            { id: "laliga", short: "LIGA", name: "La Liga", country: "Spain", espn: "soccer/esp.1", apiFootballId: 140, broadcasts: ["WOWOW", "U-NEXT"] },
+            { id: "seriea", short: "SERA", name: "Serie A", country: "Italy", espn: "soccer/ita.1", apiFootballId: 135, broadcasts: ["DAZN"] },
+            { id: "bundesliga", short: "BUND", name: "Bundesliga", country: "Germany", espn: "soccer/ger.1", apiFootballId: 78, broadcasts: ["SPOTV NOW", "スカパー!"] },
+            { id: "ligue1", short: "L1", name: "Ligue 1", country: "France", espn: "soccer/fra.1", apiFootballId: 61, broadcasts: ["DAZN", "ABEMA"] },
+            { id: "ucl", short: "UCL", name: "UEFA Champions League", country: "Europe", espn: "soccer/uefa.champions", apiFootballId: 2, broadcasts: ["WOWOW", "U-NEXT"] },
+        ];
+
+        const WC2026_FEATURED = [
+            { date: "2026-06-12T04:00:00+09:00", away: "South Africa", home: "Mexico", venue: "Estadio Azteca, Mexico City", tag: "OPENING", group: "Group A" },
+            { date: "2026-06-15T05:00:00+09:00", away: "Japan", home: "Netherlands", venue: "AT&T Stadium, Dallas", tag: "JAPAN", group: "Group F" },
+            { date: "2026-06-20T13:00:00+09:00", away: "Japan", home: "Tunisia", venue: "Estadio BBVA, Monterrey", tag: "JAPAN", group: "Group F" },
+            { date: "2026-06-26T08:00:00+09:00", away: "Sweden", home: "Japan", venue: "AT&T Stadium, Dallas", tag: "JAPAN", group: "Group F" },
+            { date: "2026-07-20T04:00:00+09:00", away: "TBD", home: "TBD", venue: "MetLife Stadium, New Jersey", tag: "FINAL", group: "決勝" },
+        ];
+
+        // All 72 group stage matches, JST converted
+        const WC2026_GROUPS = [
+            { id: "A", teams: ["Mexico", "South Africa", "Korea Republic", "Czechia"], matches: [
+                { date: "2026-06-12T04:00:00+09:00", away: "South Africa", home: "Mexico", venue: "Estadio Azteca, Mexico City" },
+                { date: "2026-06-12T11:00:00+09:00", away: "Czechia", home: "Korea Republic", venue: "Estadio Akron, Guadalajara" },
+                { date: "2026-06-19T01:00:00+09:00", away: "South Africa", home: "Czechia", venue: "Mercedes-Benz Stadium, Atlanta" },
+                { date: "2026-06-19T10:00:00+09:00", away: "Korea Republic", home: "Mexico", venue: "Estadio Akron, Guadalajara" },
+                { date: "2026-06-25T10:00:00+09:00", away: "Mexico", home: "Czechia", venue: "Estadio Azteca, Mexico City" },
+                { date: "2026-06-25T10:00:00+09:00", away: "Korea Republic", home: "South Africa", venue: "Estadio BBVA, Monterrey" },
+            ]},
+            { id: "B", teams: ["Canada", "Bosnia and Herzegovina", "Qatar", "Switzerland"], matches: [
+                { date: "2026-06-13T04:00:00+09:00", away: "Bosnia and Herzegovina", home: "Canada", venue: "BMO Field, Toronto" },
+                { date: "2026-06-14T04:00:00+09:00", away: "Switzerland", home: "Qatar", venue: "Levi's Stadium, Santa Clara" },
+                { date: "2026-06-19T04:00:00+09:00", away: "Bosnia and Herzegovina", home: "Switzerland", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-19T07:00:00+09:00", away: "Qatar", home: "Canada", venue: "BC Place, Vancouver" },
+                { date: "2026-06-25T04:00:00+09:00", away: "Canada", home: "Switzerland", venue: "BC Place, Vancouver" },
+                { date: "2026-06-25T04:00:00+09:00", away: "Qatar", home: "Bosnia and Herzegovina", venue: "Lumen Field, Seattle" },
+            ]},
+            { id: "C", teams: ["Brazil", "Morocco", "Haiti", "Scotland"], matches: [
+                { date: "2026-06-14T07:00:00+09:00", away: "Morocco", home: "Brazil", venue: "MetLife Stadium, New Jersey" },
+                { date: "2026-06-14T10:00:00+09:00", away: "Scotland", home: "Haiti", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-20T07:00:00+09:00", away: "Morocco", home: "Scotland", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-20T10:00:00+09:00", away: "Haiti", home: "Brazil", venue: "Lincoln Financial Field, Philadelphia" },
+                { date: "2026-06-25T07:00:00+09:00", away: "Brazil", home: "Scotland", venue: "Hard Rock Stadium, Miami" },
+                { date: "2026-06-25T07:00:00+09:00", away: "Haiti", home: "Morocco", venue: "Mercedes-Benz Stadium, Atlanta" },
+            ]},
+            { id: "D", teams: ["United States", "Paraguay", "Australia", "Türkiye"], matches: [
+                { date: "2026-06-13T10:00:00+09:00", away: "Paraguay", home: "United States", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-13T13:00:00+09:00", away: "Türkiye", home: "Australia", venue: "BC Place, Vancouver" },
+                { date: "2026-06-19T13:00:00+09:00", away: "Paraguay", home: "Türkiye", venue: "Levi's Stadium, Santa Clara" },
+                { date: "2026-06-20T04:00:00+09:00", away: "Australia", home: "United States", venue: "Lumen Field, Seattle" },
+                { date: "2026-06-26T11:00:00+09:00", away: "United States", home: "Türkiye", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-26T11:00:00+09:00", away: "Australia", home: "Paraguay", venue: "Levi's Stadium, Santa Clara" },
+            ]},
+            { id: "E", teams: ["Germany", "Curaçao", "Ivory Coast", "Ecuador"], matches: [
+                { date: "2026-06-15T02:00:00+09:00", away: "Curaçao", home: "Germany", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-15T08:00:00+09:00", away: "Ecuador", home: "Ivory Coast", venue: "Lincoln Financial Field, Philadelphia" },
+                { date: "2026-06-21T05:00:00+09:00", away: "Ivory Coast", home: "Germany", venue: "BMO Field, Toronto" },
+                { date: "2026-06-21T09:00:00+09:00", away: "Curaçao", home: "Ecuador", venue: "Arrowhead Stadium, Kansas City" },
+                { date: "2026-06-26T05:00:00+09:00", away: "Ivory Coast", home: "Curaçao", venue: "Lincoln Financial Field, Philadelphia" },
+                { date: "2026-06-26T05:00:00+09:00", away: "Germany", home: "Ecuador", venue: "MetLife Stadium, New Jersey" },
+            ]},
+            { id: "F", teams: ["Netherlands", "Japan", "Sweden", "Tunisia"], matches: [
+                { date: "2026-06-15T05:00:00+09:00", away: "Japan", home: "Netherlands", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-15T11:00:00+09:00", away: "Tunisia", home: "Sweden", venue: "Estadio BBVA, Monterrey" },
+                { date: "2026-06-21T02:00:00+09:00", away: "Sweden", home: "Netherlands", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-20T13:00:00+09:00", away: "Japan", home: "Tunisia", venue: "Estadio BBVA, Monterrey" },
+                { date: "2026-06-26T08:00:00+09:00", away: "Sweden", home: "Japan", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-26T08:00:00+09:00", away: "Netherlands", home: "Tunisia", venue: "Arrowhead Stadium, Kansas City" },
+            ]},
+            { id: "G", teams: ["Belgium", "Egypt", "Iran", "New Zealand"], matches: [
+                { date: "2026-06-16T04:00:00+09:00", away: "Egypt", home: "Belgium", venue: "Lumen Field, Seattle" },
+                { date: "2026-06-16T10:00:00+09:00", away: "New Zealand", home: "Iran", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-22T04:00:00+09:00", away: "Iran", home: "Belgium", venue: "SoFi Stadium, Inglewood" },
+                { date: "2026-06-22T10:00:00+09:00", away: "Egypt", home: "New Zealand", venue: "BC Place, Vancouver" },
+                { date: "2026-06-27T12:00:00+09:00", away: "Iran", home: "Egypt", venue: "Lumen Field, Seattle" },
+                { date: "2026-06-27T12:00:00+09:00", away: "Belgium", home: "New Zealand", venue: "BC Place, Vancouver" },
+            ]},
+            { id: "H", teams: ["Spain", "Cape Verde", "Saudi Arabia", "Uruguay"], matches: [
+                { date: "2026-06-16T01:00:00+09:00", away: "Cape Verde", home: "Spain", venue: "Mercedes-Benz Stadium, Atlanta" },
+                { date: "2026-06-16T07:00:00+09:00", away: "Uruguay", home: "Saudi Arabia", venue: "Hard Rock Stadium, Miami" },
+                { date: "2026-06-22T01:00:00+09:00", away: "Saudi Arabia", home: "Spain", venue: "Mercedes-Benz Stadium, Atlanta" },
+                { date: "2026-06-22T07:00:00+09:00", away: "Cape Verde", home: "Uruguay", venue: "Hard Rock Stadium, Miami" },
+                { date: "2026-06-27T09:00:00+09:00", away: "Saudi Arabia", home: "Cape Verde", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-27T09:00:00+09:00", away: "Spain", home: "Uruguay", venue: "Estadio Akron, Guadalajara" },
+            ]},
+            { id: "I", teams: ["France", "Senegal", "Iraq", "Norway"], matches: [
+                { date: "2026-06-17T04:00:00+09:00", away: "Senegal", home: "France", venue: "MetLife Stadium, New Jersey" },
+                { date: "2026-06-17T07:00:00+09:00", away: "Norway", home: "Iraq", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-23T06:00:00+09:00", away: "Iraq", home: "France", venue: "Lincoln Financial Field, Philadelphia" },
+                { date: "2026-06-23T09:00:00+09:00", away: "Senegal", home: "Norway", venue: "MetLife Stadium, New Jersey" },
+                { date: "2026-06-27T04:00:00+09:00", away: "France", home: "Norway", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-27T04:00:00+09:00", away: "Iraq", home: "Senegal", venue: "BMO Field, Toronto" },
+            ]},
+            { id: "J", teams: ["Argentina", "Algeria", "Austria", "Jordan"], matches: [
+                { date: "2026-06-17T10:00:00+09:00", away: "Algeria", home: "Argentina", venue: "Arrowhead Stadium, Kansas City" },
+                { date: "2026-06-16T13:00:00+09:00", away: "Jordan", home: "Austria", venue: "Levi's Stadium, Santa Clara" },
+                { date: "2026-06-23T02:00:00+09:00", away: "Austria", home: "Argentina", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-23T12:00:00+09:00", away: "Algeria", home: "Jordan", venue: "Levi's Stadium, Santa Clara" },
+                { date: "2026-06-28T11:00:00+09:00", away: "Argentina", home: "Jordan", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-28T11:00:00+09:00", away: "Austria", home: "Algeria", venue: "Arrowhead Stadium, Kansas City" },
+            ]},
+            { id: "K", teams: ["Portugal", "DR Congo", "Uzbekistan", "Colombia"], matches: [
+                { date: "2026-06-18T02:00:00+09:00", away: "DR Congo", home: "Portugal", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-18T11:00:00+09:00", away: "Colombia", home: "Uzbekistan", venue: "Estadio Azteca, Mexico City" },
+                { date: "2026-06-24T02:00:00+09:00", away: "Uzbekistan", home: "Portugal", venue: "NRG Stadium, Houston" },
+                { date: "2026-06-24T11:00:00+09:00", away: "DR Congo", home: "Colombia", venue: "Estadio Akron, Guadalajara" },
+                { date: "2026-06-28T08:30:00+09:00", away: "Portugal", home: "Colombia", venue: "Hard Rock Stadium, Miami" },
+                { date: "2026-06-28T08:30:00+09:00", away: "Uzbekistan", home: "DR Congo", venue: "Mercedes-Benz Stadium, Atlanta" },
+            ]},
+            { id: "L", teams: ["England", "Croatia", "Ghana", "Panama"], matches: [
+                { date: "2026-06-18T05:00:00+09:00", away: "Croatia", home: "England", venue: "AT&T Stadium, Dallas" },
+                { date: "2026-06-18T08:00:00+09:00", away: "Panama", home: "Ghana", venue: "BMO Field, Toronto" },
+                { date: "2026-06-24T05:00:00+09:00", away: "Ghana", home: "England", venue: "Gillette Stadium, Foxboro" },
+                { date: "2026-06-24T08:00:00+09:00", away: "Croatia", home: "Panama", venue: "BMO Field, Toronto" },
+                { date: "2026-06-28T06:00:00+09:00", away: "England", home: "Panama", venue: "MetLife Stadium, New Jersey" },
+                { date: "2026-06-28T06:00:00+09:00", away: "Ghana", home: "Croatia", venue: "Lincoln Financial Field, Philadelphia" },
+            ]},
+        ];
+
+        const INTL_TOURNAMENTS = [
+            { id: "wc", short: "WC", name: "FIFA World Cup", country: "Intl", sport: "soccer", espn: "soccer/fifa.world", apiFootballId: 1, broadcasts: ["NHK", "ABEMA", "テレ朝"], featuredMatches: WC2026_FEATURED, tournamentStart: "2026-06-12T10:00:00+09:00", tournamentEnd: "2026-07-20T04:00:00+09:00" },
+            { id: "wcq", short: "WCQ", name: "World Cup Qualifying", country: "Intl", sport: "soccer", espn: "soccer/fifa.worldq.afc", broadcasts: ["DAZN", "テレ朝"] },
+            { id: "euro", short: "EURO", name: "UEFA Euro", country: "Europe", sport: "soccer", espn: "soccer/uefa.euro", apiFootballId: 4, broadcasts: ["WOWOW", "U-NEXT"] },
+            { id: "copa", short: "COPA", name: "Copa America", country: "S.America", sport: "soccer", espn: "soccer/conmebol.america", apiFootballId: 9, broadcasts: ["DAZN"] },
+            { id: "cwc", short: "CWC", name: "FIFA Club World Cup", country: "Intl", sport: "soccer", espn: "soccer/fifa.cwc", broadcasts: ["DAZN", "ABEMA"] },
+        ];
+
+        const LEAGUES = [
+            {
+                id: "mlb", short: "MLB", name: "Major League Baseball", region: "USA", accent: "#FF4D2E", sport: "baseball",
+                espn: "baseball/mlb", isMlbOfficial: true, broadcasts: ["MLB.TV", "SPOTV NOW", "ABEMA", "NHK BS1"],
+            },
+            {
+                id: "npb", short: "NPB", name: "Nippon Pro Baseball", region: "JPN", accent: "#E5253E", sport: "baseball",
+                isNpb: true, espn: null, broadcasts: ["DAZN", "GAORA", "J SPORTS"], fallbackUrl: "https://npb.jp/",
+            },
+            {
+                id: "intl_soccer", short: "海外", name: "International Football", region: "EU/INTL", accent: "#00FF87", sport: "soccer",
+                isCategory: true, subLeagues: SOCCER_LEAGUES,
+            },
+            {
+                id: "jleague", short: "J1", name: "J.League Division 1", region: "JPN", accent: "#FF1B6B", sport: "soccer",
+                espn: "soccer/jpn.1", apiFootballId: 98, broadcasts: ["DAZN", "NHK"],
+            },
+            {
+                id: "intl_cup", short: "国際大会", name: "International Tournaments", region: "INTL", accent: "#FFD93D", sport: "mixed",
+                isCategory: true, subLeagues: INTL_TOURNAMENTS,
+            },
+            {
+                id: "nba", short: "NBA", name: "National Basketball Association", region: "USA", accent: "#C9082A", sport: "basketball",
+                espn: "basketball/nba", broadcasts: ["NBA Rakuten", "WOWOW"],
+            },
+        ];
+
+        const VIEWS = [
+            { id: "scores", label: "Scores", icon: I.Activity },
+            { id: "standings", label: "Standings", icon: I.Trophy },
+            { id: "leaders", label: "Leaders", icon: I.Star },
+            { id: "schedule", label: "Schedule", icon: I.Calendar },
+        ];
+
+        // -----------------------------
+        // Japanese players & teams (for JP highlight feature)
+        // Maps team display name -> roster of notable Japanese players
+        // -----------------------------
+        const JP_PLAYERS = {
+            // MLB
+            "Los Angeles Dodgers": ["大谷翔平", "山本由伸", "佐々木朗希"],
+            "Chicago Cubs": ["鈴木誠也", "今永昇太"],
+            "Boston Red Sox": ["吉田正尚"],
+            "New York Mets": ["千賀滉大"],
+            "San Diego Padres": ["ダルビッシュ有", "松井裕樹"],
+            "Toronto Blue Jays": ["菊池雄星"],
+            // NBA
+            "Los Angeles Lakers": ["八村塁"],
+            "Phoenix Suns": ["渡邊雄太"],
+            "Memphis Grizzlies": ["河村勇輝"],
+        };
+        // Soccer national team detection (substring match on team name)
+        const JP_NATIONAL_KEYWORDS = ["Japan", "日本"];
+
+        function getJpPlayers(homeName, awayName) {
+            const players = [];
+            [homeName, awayName].forEach((name) => {
+                if (!name) return;
+                if (JP_PLAYERS[name]) players.push(...JP_PLAYERS[name]);
+                // Soccer national team
+                if (JP_NATIONAL_KEYWORDS.some((kw) => name.includes(kw))) {
+                    players.push("日本代表");
+                }
+            });
+            return [...new Set(players)];
+        }
+
+        // -----------------------------
+        // Storage (localStorage with fallback)
+        // -----------------------------
+        const STORAGE_KEY = "scorehub_v1";
+        function loadStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return { favTeams: [], favLeagues: [], jpFilter: false };
+                const parsed = JSON.parse(raw);
+                return {
+                    favTeams: parsed.favTeams || [],
+                    favLeagues: parsed.favLeagues || [],
+                    jpFilter: parsed.jpFilter || false,
+                };
+            } catch { return { favTeams: [], favLeagues: [], jpFilter: false }; }
+        }
+        function saveStorage(state) {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+        }
+
+        // -----------------------------
+        // Helpers
+        // -----------------------------
+        const pad = (n) => String(n).padStart(2, "0");
+        const ymd = (d) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+        const dateRange = (view) => {
+            const today = new Date();
+            if (view === "scores") {
+                const yest = new Date(today); yest.setDate(yest.getDate() - 1);
+                return `${ymd(yest)}-${ymd(today)}`;
+            }
+            if (view === "schedule") {
+                const tom = new Date(today); tom.setDate(tom.getDate() + 1);
+                const fut = new Date(today); fut.setDate(fut.getDate() + 7);
+                return `${ymd(tom)}-${ymd(fut)}`;
+            }
+            return null;
+        };
+
+        // -----------------------------
+        // Fetch wrappers
+        // -----------------------------
+        async function fetchScoreboard(espnPath, view, offset = 0) {
+            let range = null;
+            const targetDate = new Date();
+            if (view === "scores") {
+                targetDate.setDate(targetDate.getDate() + offset);
+                range = ymd(targetDate);
+            } else if (view === "schedule") {
+                const tom = new Date(targetDate); tom.setDate(tom.getDate() + 1);
+                const fut = new Date(targetDate); fut.setDate(fut.getDate() + 7);
+                range = `${ymd(tom)}-${ymd(fut)}`;
+            }
+            const url = `https://site.api.espn.com/apis/site/v2/sports/${espnPath}/scoreboard${range ? `?dates=${range}&limit=50` : ""}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`ESPN ${res.status}`);
+            return res.json();
+        }
+        async function fetchStandings(espnPath) {
+            const url = `https://site.api.espn.com/apis/v2/sports/${espnPath}/standings?level=3`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`ESPN ${res.status}`);
+            return res.json();
+        }
+        async function fetchLeaders(espnPath, sport) {
+            // ESPN's /leaders endpoint structure varies by league. Use the most reliable URL per sport.
+            const candidates = [];
+            // Standard - works for many soccer leagues
+            candidates.push(`https://site.api.espn.com/apis/site/v2/sports/${espnPath}/leaders`);
+            // MLB / NBA athlete leaders (richer data)
+            if (sport === "baseball" || sport === "basketball") {
+                const seasonYear = new Date().getFullYear();
+                candidates.unshift(`https://site.web.api.espn.com/apis/common/v3/sports/${espnPath}/athletes/statistics/byseason?season=${seasonYear}&seasontype=2`);
+            }
+            let lastErr;
+            for (const url of candidates) {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) { lastErr = new Error(`ESPN ${res.status}`); continue; }
+                    const json = await res.json();
+                    return { ...json, _source: url };
+                } catch (e) { lastErr = e; }
+            }
+            throw lastErr || new Error("Failed to load leaders");
+        }
+        async function fetchSummary(espnPath, eventId) {
+            const url = `https://site.api.espn.com/apis/site/v2/sports/${espnPath}/summary?event=${eventId}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`ESPN ${res.status}`);
+            return res.json();
+        }
+        async function fetchMlbDetail(gamePk) {
+            const url = `https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`MLB Stats API ${res.status}`);
+            return res.json();
+        }
+
+        // -----------------------------
+        // Parse helpers
+        // -----------------------------
+        function parseGame(event, sport, broadcasts) {
+            const comp = event?.competitions?.[0];
+            if (!comp) return null;
+            const home = comp.competitors?.find((c) => c.homeAway === "home");
+            const away = comp.competitors?.find((c) => c.homeAway === "away");
+            if (!home || !away) return null;
+            const stateMap = { pre: "scheduled", in: "live", post: "final" };
+            const status = stateMap[event.status?.type?.state] || "scheduled";
+            const date = new Date(event.date);
+            const dateLabel = `${pad(date.getMonth() + 1)}/${pad(date.getDate())}`;
+            const timeLabel = date.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tokyo" });
+            let detail = null;
+            if (status === "live") {
+                if (sport === "baseball") detail = event.status?.type?.shortDetail || event.status?.type?.detail || (event.status?.period ? `${event.status.period}回` : null);
+                else detail = event.status?.displayClock || (event.status?.period ? `${event.status.period}H` : null);
+            }
+            return {
+                id: event.id,
+                home: home.team?.displayName || home.team?.name || "Home",
+                away: away.team?.displayName || away.team?.name || "Away",
+                homeShort: home.team?.shortDisplayName || home.team?.abbreviation || home.team?.displayName,
+                awayShort: away.team?.shortDisplayName || away.team?.abbreviation || away.team?.displayName,
+                homeScore: home.score != null && home.score !== "" ? Number(home.score) : null,
+                awayScore: away.score != null && away.score !== "" ? Number(away.score) : null,
+                homeLogo: home.team?.logo || null,
+                awayLogo: away.team?.logo || null,
+                status,
+                inning: sport === "baseball" ? detail : null,
+                minute: sport === "soccer" ? detail : null,
+                date: dateLabel,
+                time: timeLabel,
+                venue: comp.venue?.fullName || null,
+                broadcast: broadcasts ? broadcasts.join(" / ") : null,
+            };
+        }
+
+        function statValue(stats, ...names) {
+            if (!Array.isArray(stats)) return null;
+            for (const n of names) {
+                const s = stats.find((x) => x.name === n || x.abbreviation === n || x.type === n);
+                if (s) return s.value ?? s.displayValue ?? null;
+            }
+            return null;
+        }
+
+        function parseEntries(entries, sport) {
+            return entries.map((e, idx) => {
+                const stats = e.stats || [];
+                const team = e.team?.displayName || e.team?.shortDisplayName || e.team?.name || "—";
+                const logo = e.team?.logos?.[0]?.href || null;
+                if (sport === "baseball") {
+                    return { rank: idx + 1, team, logo, wins: statValue(stats, "wins") ?? 0, losses: statValue(stats, "losses") ?? 0, gamesBack: String(statValue(stats, "gamesBehind") ?? "—") };
+                }
+                return { rank: statValue(stats, "rank") ?? idx + 1, team, logo, played: statValue(stats, "gamesPlayed") ?? 0, wins: statValue(stats, "wins") ?? 0, draws: statValue(stats, "ties") ?? 0, losses: statValue(stats, "losses") ?? 0, gd: statValue(stats, "pointDifferential") ?? 0, points: statValue(stats, "points") ?? 0 };
+            });
+        }
+
+        function parseStandings(data, sport) {
+            const groups = [];
+            const walk = (node, parentName = "") => {
+                if (!node) return;
+                if (node.standings?.entries?.length) {
+                    groups.push({
+                        name: parentName ? `${parentName} · ${node.name || node.abbreviation || ""}`.trim().replace(/·\s*$/, "") : node.name || node.abbreviation || "Standings",
+                        teams: parseEntries(node.standings.entries, sport),
+                    });
+                }
+                if (Array.isArray(node.children)) for (const c of node.children) walk(c, node.name || parentName);
+            };
+            walk(data);
+            return groups;
+        }
+
+        function parseLeaders(data, sport) {
+            if (!data) return [];
+
+            // ESPN byseason format (MLB/NBA): { categories: [{ name, displayName, leaders: [{ athlete, value, displayValue, team }] }] }
+            // or:                           { results: [{ category, athletes: [{ athlete, stats }] }] }
+            if (Array.isArray(data.categories) && data.categories.length > 0 && data.categories[0]?.leaders) {
+                const result = [];
+                for (const cat of data.categories) {
+                    const list = cat.leaders || [];
+                    if (list.length === 0) continue;
+                    const entries = list.slice(0, 10).map((l) => {
+                        const athlete = l.athlete || l;
+                        const team = l.team || athlete?.team;
+                        return {
+                            name: athlete?.displayName || athlete?.fullName || athlete?.name || "—",
+                            headshot: athlete?.headshot?.href || athlete?.headshot || null,
+                            team: team?.displayName || team?.shortDisplayName || team?.abbreviation || "",
+                            teamLogo: team?.logos?.[0]?.href || team?.logo || null,
+                            value: l.displayValue ?? l.value ?? "—",
+                        };
+                    });
+                    result.push({ name: cat.displayName || cat.name || "Stat", abbr: cat.abbreviation || "", entries });
+                }
+                if (result.length > 0) return result;
+            }
+
+            // API-Football
+            if (data.apiFootball) {
+                if (!data.data || data.data.length === 0) return [];
+                const entries = data.data.slice(0, 10).map((item) => ({
+                    name: item.player.name,
+                    headshot: item.player.photo,
+                    team: item.statistics[0].team.name,
+                    teamLogo: item.statistics[0].team.logo,
+                    value: item.statistics[0].goals.total
+                }));
+                return [{ name: "Top Scorers (得点王)", abbr: "GLS", entries }];
+            }
+
+            // MLB official
+            if (data.mlbOfficial) {
+                return data.data.map(res => {
+                    const category = res.leaderCategories?.[0]?.displayName || "Stat";
+                    const entries = (res.leagueLeaders?.[0]?.leaders || []).map(l => ({
+                        name: l.person.fullName,
+                        headshot: `https://img.mlbstatic.com/mlb-photos/alphabetic/atmlb/60x60/${l.person.id}.png`,
+                        team: l.team.name,
+                        teamLogo: `https://www.mlbstatic.com/team-logos/${l.team.id}.svg`,
+                        value: l.value
+                    }));
+                    return { name: category, abbr: "", entries };
+                });
+            }
+
+            // ESPN soccer/standard leaders
+            const findCategories = (obj) => {
+                if (!obj) return [];
+                if (Array.isArray(obj.categories)) return obj.categories;
+                if (Array.isArray(obj.leagueLeaders)) return obj.leagueLeaders;
+                if (Array.isArray(obj.leaders) && obj.leaders[0]?.leaders) return obj.leaders;
+                return [];
+            };
+            const categories = findCategories(data);
+            const result = [];
+            for (const cat of categories) {
+                const list = cat.leaders || cat.leader || [];
+                if (!Array.isArray(list) || list.length === 0) continue;
+                const entries = list.slice(0, 10).map((l) => {
+                    const athlete = l.athlete || l.player || l;
+                    const team = l.team || athlete?.team;
+                    return {
+                        name: athlete?.displayName || athlete?.fullName || athlete?.name || "—",
+                        headshot: athlete?.headshot?.href || null,
+                        team: team?.displayName || team?.shortDisplayName || team?.abbreviation || "",
+                        teamLogo: team?.logos?.[0]?.href || team?.logo || null,
+                        value: l.displayValue ?? l.value ?? "—",
+                    };
+                });
+                result.push({ name: cat.displayName || cat.name || cat.abbreviation || "Stat", abbr: cat.abbreviation || cat.shortDisplayName || "", entries });
+            }
+            return result;
+        }
+
+        function parseSummary(data, sport) {
+            const out = { scoringPlays: [], teamStats: null, venue: null, attendance: null, lineups: null, formations: null, linescore: null, topScorers: null };
+
+            // Determine home/away team names for matching scoring plays to teams
+            const compHome = data.header?.competitions?.[0]?.competitors?.find((c) => c.homeAway === "home");
+            const compAway = data.header?.competitions?.[0]?.competitors?.find((c) => c.homeAway === "away");
+            const homeName = compHome?.team?.displayName || compHome?.team?.name;
+            const awayName = compAway?.team?.displayName || compAway?.team?.name;
+
+            if (Array.isArray(data.scoringPlays)) {
+                out.scoringPlays = data.scoringPlays.map((p) => {
+                    const teamName = p.team?.displayName || p.team?.name || "";
+                    const isHome = teamName === homeName;
+                    const homeAway = isHome ? "home" : "away";
+
+                    if (sport === "baseball") {
+                        const text = p.text || p.description || "";
+                        // Extract event type from scoringType or text
+                        const scoringTypeName = p.scoringType?.displayName || p.type?.text || "";
+                        const isHomeRun = /home run|homer/i.test(scoringTypeName) || /home run|homer/i.test(text);
+                        const isGrandSlam = /grand slam/i.test(text);
+                        // Try to find batter name
+                        const batter = p.athletesInvolved?.[0]?.displayName || p.athletesInvolved?.[0]?.shortName || null;
+                        // Detect event type from scoringType abbreviation or text
+                        let eventType = scoringTypeName;
+                        if (!eventType) {
+                            if (isGrandSlam) eventType = "Grand Slam";
+                            else if (isHomeRun) eventType = "Home Run";
+                            else if (/triple/i.test(text)) eventType = "Triple";
+                            else if (/double/i.test(text)) eventType = "Double";
+                            else if (/single|singles/i.test(text)) eventType = "Single";
+                            else if (/walk|walked/i.test(text)) eventType = "Walk";
+                            else if (/sac.*fly|sacrifice fly/i.test(text)) eventType = "Sac Fly";
+                            else if (/wild pitch/i.test(text)) eventType = "Wild Pitch";
+                            else if (/error/i.test(text)) eventType = "Field Error";
+                            else if (/hit by pitch/i.test(text)) eventType = "Hit By Pitch";
+                        }
+                        return {
+                            when: `${p.period?.type === "Top" || p.inningHalf === "Top" ? "表" : p.period?.type === "Bottom" || p.inningHalf === "Bottom" ? "裏" : ""}${p.period?.number ?? p.inning ?? ""}回`,
+                            team: teamName, homeAway,
+                            text,
+                            score: p.awayScore != null && p.homeScore != null ? `${p.awayScore}-${p.homeScore}` : null,
+                            batter,
+                            eventType,
+                            isHomeRun,
+                            isGrandSlam,
+                        };
+                    }
+
+                    if (sport === "soccer") {
+                        // Soccer: extract minute, scorer, assist, type
+                        const minute = p.clock?.displayValue || (p.period?.number ? `${p.period.number}'` : "");
+                        const athletes = Array.isArray(p.athletesInvolved) ? p.athletesInvolved : [];
+                        const scorer = athletes[0]?.displayName || athletes[0]?.shortName || p.scorer?.displayName || null;
+                        // Try to extract assist - usually the 2nd athlete
+                        let assist = null;
+                        if (athletes.length > 1) assist = athletes[1].displayName || athletes[1].shortName;
+                        // Detect type from scoringType or text
+                        const typeText = p.scoringType?.displayName || p.type?.text || "";
+                        const isPenalty = /penalty/i.test(typeText) || /penalty/i.test(p.text || "");
+                        const isOwnGoal = /own goal/i.test(typeText) || /own goal/i.test(p.text || "");
+                        return {
+                            when: minute, team: teamName, homeAway,
+                            text: p.text || p.description || "Goal",
+                            score: p.awayScore != null && p.homeScore != null ? `${p.awayScore}-${p.homeScore}` : null,
+                            scorer, assist,
+                            scoringType: isPenalty ? "PK" : (isOwnGoal ? "OG" : null),
+                        };
+                    }
+
+                    // Basketball: keep simple
+                    return {
+                        when: p.clock?.displayValue ? `Q${p.period?.number || "?"} ${p.clock.displayValue}` : (p.period?.number ? `Q${p.period.number}` : ""),
+                        team: teamName, homeAway,
+                        text: p.text || p.description || "",
+                        score: p.awayScore != null && p.homeScore != null ? `${p.awayScore}-${p.homeScore}` : null,
+                        scorer: p.athletesInvolved?.[0]?.displayName || null,
+                    };
+                });
+            }
+
+            // Linescore (per-quarter / per-period / per-inning scores)
+            if (compHome?.linescores && compAway?.linescores) {
+                out.linescore = {
+                    home: compHome.linescores.map((s) => s.value ?? s.displayValue ?? 0),
+                    away: compAway.linescores.map((s) => s.value ?? s.displayValue ?? 0),
+                    homeTotal: compHome.score != null ? Number(compHome.score) : null,
+                    awayTotal: compAway.score != null ? Number(compAway.score) : null,
+                };
+            }
+
+            if (data.boxscore?.teams) {
+                const homeT = data.boxscore.teams.find((t) => t.homeAway === "home") || data.boxscore.teams[1];
+                const awayT = data.boxscore.teams.find((t) => t.homeAway === "away") || data.boxscore.teams[0];
+                const toMap = (t) => {
+                    const m = {};
+                    (t?.statistics || []).forEach((s) => { m[s.name || s.label] = s.displayValue ?? s.value; });
+                    return m;
+                };
+                out.teamStats = {
+                    home: toMap(homeT), away: toMap(awayT),
+                    homeName: homeT?.team?.displayName, awayName: awayT?.team?.displayName,
+                };
+
+                // For baseball: enrich linescore with hits and errors from boxscore stats
+                if (sport === "baseball" && out.linescore) {
+                    const getStatNum = (m, ...keys) => {
+                        for (const k of keys) {
+                            const v = m[k];
+                            if (v != null) return Number(v) || v;
+                        }
+                        return null;
+                    };
+                    out.linescore.homeHits = getStatNum(out.teamStats.home, "hits", "Hits", "H");
+                    out.linescore.homeErrors = getStatNum(out.teamStats.home, "errors", "Errors", "E");
+                    out.linescore.awayHits = getStatNum(out.teamStats.away, "hits", "Hits", "H");
+                    out.linescore.awayErrors = getStatNum(out.teamStats.away, "errors", "Errors", "E");
+                }
+            }
+
+            // Top scorers / leaders for basketball
+            if (sport === "basketball" && Array.isArray(data.leaders)) {
+                const extractTopScorers = (teamLeadersData) => {
+                    const points = teamLeadersData?.find((l) => l.name === "points" || l.shortDisplayName === "PTS");
+                    if (!points || !Array.isArray(points.leaders)) return null;
+                    return points.leaders.slice(0, 3).map((p) => ({
+                        name: p.athlete?.displayName || p.athlete?.shortName || "—",
+                        value: p.displayValue || `${p.value || 0} PTS`,
+                    }));
+                };
+                const home = data.leaders.find((l) => l.homeAway === "home");
+                const away = data.leaders.find((l) => l.homeAway === "away");
+                out.topScorers = {
+                    home: extractTopScorers(home?.leaders) || [],
+                    away: extractTopScorers(away?.leaders) || [],
+                };
+            }
+
+            if (data.rosters && Array.isArray(data.rosters) && data.rosters.length > 0) {
+                const lineups = { home: [], away: [] };
+                const formations = { home: null, away: null };
+
+                data.rosters.forEach(r => {
+                    const isHome = r.homeAway === "home";
+                    const teamKey = isHome ? "home" : "away";
+                    if (r.formation) formations[teamKey] = r.formation;
+
+                    const roster = r.roster || [];
+                    lineups[teamKey] = roster.filter(p => p.starter).map(p => {
+                        const athlete = p.athlete || {};
+                        return {
+                            name: athlete.displayName || athlete.shortName || athlete.fullName || "—",
+                            shortName: athlete.shortName || athlete.lastName || athlete.displayName?.split(" ").pop() || "—",
+                            position: p.position?.abbreviation || athlete.position?.abbreviation || "",
+                            number: p.jersey || "",
+                            headshot: athlete.headshot?.href || null
+                        };
+                    });
+                });
+
+                if (lineups.home.length > 0 || lineups.away.length > 0) {
+                    out.lineups = lineups;
+                    out.formations = formations;
+                }
+            }
+
+            // Highlights videos (ESPN may include them in summary)
+            if (Array.isArray(data.videos) && data.videos.length > 0) {
+                out.videos = data.videos.slice(0, 5).map((v) => ({
+                    id: v.id,
+                    headline: v.headline || v.title || "Highlights",
+                    description: v.description || "",
+                    thumbnail: v.thumbnail || v.images?.[0]?.url || null,
+                    duration: v.duration || null,
+                    url: v.links?.web?.href || v.links?.web?.short?.href || (v.id ? `https://www.espn.com/video/clip?id=${v.id}` : null),
+                })).filter((v) => v.url);
+            }
+
+            out.venue = data.gameInfo?.venue?.fullName || data.header?.competitions?.[0]?.venue?.fullName || null;
+            out.attendance = data.gameInfo?.attendance || null;
+            return out;
+        }
+
+        function parseMlbSummary(data) {
+            const liveData = data.liveData;
+            const gameData = data.gameData;
+            const homeName = gameData?.teams?.home?.name;
+            const awayName = gameData?.teams?.away?.name;
+
+            const allPlays = liveData?.plays?.allPlays || [];
+            const scoringPlays = allPlays.filter(p => p.about?.isScoringPlay).map(p => {
+                const isAway = p.about.halfInning === 'top';
+                const teamName = isAway ? awayName : homeName;
+                // result.event = "Home Run", "Single", "Double", "Walk", "Sac Fly", "Wild Pitch", etc.
+                const eventType = p.result?.event || "";
+                const desc = p.result?.description || "";
+                // Find batter & responsible pitcher
+                const batter = p.matchup?.batter?.fullName || null;
+                const pitcher = p.matchup?.pitcher?.fullName || null;
+                const isHomeRun = /home run/i.test(eventType);
+                const isGrandSlam = /grand slam/i.test(desc);
+                return {
+                    when: `${isAway ? '表' : '裏'}${p.about.inning}回`,
+                    inning: p.about.inning,
+                    halfInning: p.about.halfInning,
+                    team: teamName, homeAway: isAway ? "away" : "home",
+                    text: desc,
+                    score: p.result ? `${p.result.awayScore}-${p.result.homeScore}` : null,
+                    eventType,
+                    batter,
+                    pitcher,
+                    isHomeRun,
+                    isGrandSlam,
+                };
+            });
+
+            const homeBox = liveData?.boxscore?.teams?.home;
+            const awayBox = liveData?.boxscore?.teams?.away;
+
+            const toStats = (box) => {
+                const b = box?.teamStats?.batting || {};
+                const f = box?.teamStats?.fielding || {};
+                return { hits: b.hits ?? 0, errors: f.errors ?? 0, homeRuns: b.homeRuns ?? 0, strikeOuts: b.strikeOuts ?? 0 };
+            };
+
+            const teamStats = homeBox && awayBox ? { home: toStats(homeBox), away: toStats(awayBox), homeName, awayName } : null;
+
+            // Linescore (MLB official format: per-inning runs, hits, errors)
+            const ls = liveData?.linescore;
+            let linescore = null;
+            if (ls && Array.isArray(ls.innings)) {
+                const homeRuns = ls.innings.map((inn) => inn.home?.runs);
+                const awayRuns = ls.innings.map((inn) => inn.away?.runs);
+                linescore = {
+                    home: homeRuns,
+                    away: awayRuns,
+                    homeTotal: ls.teams?.home?.runs ?? null,
+                    awayTotal: ls.teams?.away?.runs ?? null,
+                    homeHits: ls.teams?.home?.hits ?? null,
+                    awayHits: ls.teams?.away?.hits ?? null,
+                    homeErrors: ls.teams?.home?.errors ?? null,
+                    awayErrors: ls.teams?.away?.errors ?? null,
+                    currentInning: ls.currentInning,
+                    inningHalf: ls.inningHalf, // "Top" or "Bottom"
+                    isComplete: gameData?.status?.abstractGameState === "Final",
+                };
+            }
+
+            const getLineup = (box) => {
+                const order = box?.battingOrder || [];
+                if (order.length === 0) return null;
+                return order.map(id => {
+                    const player = box.players[`ID${id}`];
+                    return { name: player?.person?.fullName || 'Unknown', position: player?.position?.abbreviation || '', number: '' };
+                });
+            };
+            const awayLineup = getLineup(awayBox);
+            const homeLineup = getLineup(homeBox);
+            const lineups = awayLineup && homeLineup ? { home: homeLineup, away: awayLineup } : null;
+
+            return { scoringPlays, teamStats, lineups, formations: null, venue: gameData?.venue?.name || null, attendance: gameData?.gameInfo?.attendance || null, linescore };
+        }
+
+
+        // -----------------------------
+        // UI components
+        // -----------------------------
+        function TeamLogo({ url, size = 24, fallback }) {
+            if (!url) return <div style={{ width: size, height: size, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.4, fontWeight: 'bold' }}>{fallback?.charAt(0) || '?'}</div>;
+            return <img src={url} alt="Logo" style={{ width: size, height: size, objectFit: 'contain' }} loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />;
+        }
+
+        function PlayerIcon({ player }) {
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: 44 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#111', border: '1px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+                        {player.headshot ? (
+                            <img src={player.headshot} alt={player.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                        ) : (
+                            <span style={{ fontSize: 10, color: '#aaa', fontFamily: "'JetBrains Mono', monospace" }}>{player.number || <I.User size={14} />}</span>
+                        )}
+                        {player.number && player.headshot && (
+                            <div style={{ position: 'absolute', bottom: 0, right: 0, background: 'rgba(0,0,0,0.7)', fontSize: 8, padding: '1px 3px', borderRadius: '4px 0 0 0', fontFamily: "'JetBrains Mono', monospace", color: '#fff' }}>{player.number}</div>
+                        )}
+                    </div>
+                    <div style={{ fontSize: 9, color: '#fff', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+                        {player.shortName || player.name}
+                    </div>
+                </div>
+            );
+        }
+
+        function PitchLineup({ lineup, accent }) {
+            const groups = { GK: [], DF: [], MF: [], FW: [] };
+            lineup.forEach(p => {
+                const pos = p.position.toUpperCase();
+                if (pos.includes('G')) groups.GK.push(p);
+                else if (pos.includes('D') || pos === 'CB' || pos === 'RB' || pos === 'LB' || pos === 'RWB' || pos === 'LWB') groups.DF.push(p);
+                else if (pos.includes('M') || pos === 'CM' || pos === 'CDM' || pos === 'CAM' || pos === 'RM' || pos === 'LM') groups.MF.push(p);
+                else groups.FW.push(p);
+            });
+            if (groups.GK.length === 0 && lineup.length > 0) groups.GK.push(lineup[0]);
+
+            return (
+                <div className="soccer-pitch pitch-lines">
+                    <div className="pitch-center-line"></div>
+                    <div className="pitch-center-circle"></div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 12, zIndex: 1 }}>
+                        {groups.FW.map((p, i) => <PlayerIcon key={'fw' + i} player={p} />)}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 12, zIndex: 1 }}>
+                        {groups.MF.map((p, i) => <PlayerIcon key={'mf' + i} player={p} />)}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 12, zIndex: 1 }}>
+                        {groups.DF.map((p, i) => <PlayerIcon key={'df' + i} player={p} />)}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 12, zIndex: 1 }}>
+                        {groups.GK.map((p, i) => <PlayerIcon key={'gk' + i} player={p} />)}
+                    </div>
+                </div>
+            );
+        }
+
+        function StatusPill({ status, accent, detail }) {
+            const map = {
+                live: { bg: accent, color: "#0a0a0a", label: detail || "LIVE", pulse: true },
+                final: { bg: "#2a2a2a", color: "#888", label: "FINAL", pulse: false },
+                scheduled: { bg: "transparent", color: "#666", label: detail || "SCHEDULED", pulse: false, border: true },
+            };
+            const s = map[status] || map.scheduled;
+            return (
+                <span style={{ background: s.bg, color: s.color, border: s.border ? "1px solid #333" : "none", padding: "3px 8px", borderRadius: 2, fontSize: 10, fontWeight: 700, letterSpacing: 1, fontFamily: "'JetBrains Mono', monospace", display: "inline-flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}>
+                    {s.pulse && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#0a0a0a", animation: "pulse 1.4s ease-in-out infinite" }} />}
+                    {s.label}
+                </span>
+            );
+        }
+
+        function BroadcastBadge({ broadcast }) {
+            if (!broadcast) return null;
+            return (
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 8px", background: "rgba(255,255,255,0.04)", border: "1px solid #222", borderRadius: 2 }}>
+                    <I.Tv size={10} />
+                    <span style={{ fontSize: 10, color: "#bbb", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 0.3, fontWeight: 600 }}>{broadcast}</span>
+                </div>
+            );
+        }
+
+        function GameCard({ game, accent, sport, onClick, isFav, onToggleFav, jpPlayers }) {
+            const finished = game.status === "final" || game.status === "live";
+            const detail = sport === "baseball" ? game.inning : game.minute;
+            const homeWin = finished && game.homeScore > game.awayScore;
+            const awayWin = finished && game.awayScore > game.homeScore;
+            const hasJp = jpPlayers && jpPlayers.length > 0;
+            return (
+                <div className="clickable" onClick={onClick} style={{ background: "#141414", border: hasJp ? "1px solid rgba(229,37,62,0.4)" : "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, padding: "14px 16px", marginBottom: 8, position: "relative" }}>
+                    {hasJp && (
+                        <div style={{ position: "absolute", top: -1, right: -1, background: "#E5253E", color: "#fff", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, fontWeight: 800, padding: "2px 6px", letterSpacing: 1 }}>
+                            🇯🇵 JP
+                        </div>
+                    )}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 8 }}>
+                        <span style={{ fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 0.5 }}>
+                            {game.date}{game.time ? ` · ${game.time}` : ""}
+                        </span>
+                        <StatusPill status={game.status} accent={accent} detail={detail} />
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {[{ team: game.away, score: game.awayScore, win: awayWin, logo: game.awayLogo }, { team: game.home, score: game.homeScore, win: homeWin, logo: game.homeLogo }].map((row, i) => {
+                            const fav = isFav && isFav(row.team);
+                            return (
+                                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: 'hidden', flex: 1 }}>
+                                        <TeamLogo url={row.logo} size={20} fallback={row.team} />
+                                        <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: row.win ? 900 : 700, fontSize: 20, color: row.win ? "#fff" : "#aaa", letterSpacing: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                            {row.team}
+                                        </span>
+                                        {onToggleFav && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); onToggleFav(row.team); }}
+                                                style={{ background: "none", border: "none", padding: 4, color: fav ? "#FF4D6D" : "#444", display: "flex", flexShrink: 0 }}
+                                                aria-label={fav ? "Remove favorite" : "Add favorite"}
+                                            >
+                                                <I.Heart size={14} filled={fav} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, fontWeight: 700, color: row.win ? accent : finished ? "#666" : "#444", minWidth: 30, textAlign: "right" }}>
+                                        {row.score ?? "—"}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div style={{ marginTop: 14, paddingTop: 10, borderTop: "1px dashed #222", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                            {game.broadcast && <BroadcastBadge broadcast={game.broadcast} />}
+                            {hasJp && (
+                                <span style={{ fontSize: 10, color: "#E5253E", fontFamily: "'Manrope', sans-serif", fontWeight: 600 }}>
+                                    {jpPlayers.join(" / ")}
+                                </span>
+                            )}
+                        </div>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#555", letterSpacing: 1 }}>TAP →</span>
+                    </div>
+                </div>
+            );
+        }
+
+        function StandingsTable({ groups, accent, sport }) {
+            const cols = sport === "baseball" ? "28px 1fr 32px 32px 44px" : "28px 1fr 28px 22px 22px 22px 32px";
+            return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    {(groups || []).map((group, gi) => (
+                        <div key={gi}>
+                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: 2, color: accent, marginBottom: 8, textTransform: "uppercase" }}>{group.name}</div>
+                            <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                                <div style={{ display: "grid", gridTemplateColumns: cols, padding: "8px 12px", gap: 6, fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, borderBottom: "1px solid #1f1f1f" }}>
+                                    <span>#</span><span>TEAM</span>
+                                    {sport === "baseball" ? (
+                                        <><span style={{ textAlign: "right" }}>W</span><span style={{ textAlign: "right" }}>L</span><span style={{ textAlign: "right" }}>GB</span></>
+                                    ) : (
+                                        <><span style={{ textAlign: "right" }}>P</span><span style={{ textAlign: "right" }}>W</span><span style={{ textAlign: "right" }}>D</span><span style={{ textAlign: "right" }}>L</span><span style={{ textAlign: "right" }}>PTS</span></>
+                                    )}
+                                </div>
+                                {group.teams.map((t, i) => (
+                                    <div key={i} style={{ display: "grid", gridTemplateColumns: cols, padding: "10px 12px", gap: 6, alignItems: "center", borderBottom: i < group.teams.length - 1 ? "1px solid #1a1a1a" : "none" }}>
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: i < 3 ? accent : "#666", fontWeight: 700 }}>{t.rank}</span>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8, overflow: "hidden" }}>
+                                            <TeamLogo url={t.logo} size={18} fallback={t.team} />
+                                            <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: "#eee", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.team}</span>
+                                        </div>
+                                        {sport === "baseball" ? (
+                                            <>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#ddd", textAlign: "right" }}>{t.wins ?? "—"}</span>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#888", textAlign: "right" }}>{t.losses ?? "—"}</span>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#888", textAlign: "right" }}>{t.gamesBack ?? "—"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#888", textAlign: "right" }}>{t.played ?? "—"}</span>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#ddd", textAlign: "right" }}>{t.wins ?? "—"}</span>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#888", textAlign: "right" }}>{t.draws ?? "—"}</span>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#888", textAlign: "right" }}>{t.losses ?? "—"}</span>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: accent, textAlign: "right", fontWeight: 700 }}>{t.points ?? "—"}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function ScheduleList({ upcoming, accent, onSelect }) {
+            return (
+                <div>
+                    {(upcoming || []).map((g, i) => (
+                        <div key={i} className="clickable" onClick={() => onSelect && onSelect(g)} style={{ padding: "12px 14px", background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, marginBottom: 6 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: accent, letterSpacing: 1, minWidth: 50 }}>
+                                    <div>{g.date}</div>
+                                    <div style={{ color: "#666", marginTop: 2 }}>{g.time}</div>
+                                </div>
+                                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <TeamLogo url={g.awayLogo} size={16} fallback={g.awayShort} />
+                                        <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 700, fontSize: 15, color: "#eee" }}>{g.awayShort}</span>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <TeamLogo url={g.homeLogo} size={16} fallback={g.homeShort} />
+                                        <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 700, fontSize: 15, color: "#eee" }}>{g.homeShort}</span>
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: 12, color: "#444", fontWeight: 900, fontFamily: "'Big Shoulders Display', sans-serif" }}>VS</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function LeadersBoard({ categories, accent }) {
+            if (!categories || categories.length === 0) return (
+                <div style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, padding: 20, textAlign: "center" }}>
+                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 18, color: "#fff", letterSpacing: 1, marginBottom: 8 }}>📊 個人成績</div>
+                    <div style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>このリーグの個人成績データはシーズンオフ中、または現在ESPN APIで提供されていません。シーズン中に再度お試しください。</div>
+                </div>
+            );
+            return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    {categories.map((cat, ci) => (
+                        <div key={ci} style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                            <div style={{ padding: "10px 14px", borderBottom: "1px solid #1f1f1f", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                                <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: 1, textTransform: "uppercase" }}>{cat.name}</span>
+                                {cat.abbr && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, letterSpacing: 1 }}>{cat.abbr}</span>}
+                            </div>
+                            {cat.entries.map((e, i) => (
+                                <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr auto", gap: 10, alignItems: "center", padding: "8px 14px", borderBottom: i < cat.entries.length - 1 ? "1px solid #1a1a1a" : "none" }}>
+                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: i === 0 ? accent : "#666", fontWeight: 700 }}>{i + 1}</span>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
+                                        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#111", border: "1px solid #333", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                            {e.headshot ? <img src={e.headshot} alt={e.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <I.User size={14} color="#666" />}
+                                        </div>
+                                        <div style={{ overflow: "hidden" }}>
+                                            <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: "#eee", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</div>
+                                            {e.team && <div style={{ fontSize: 10, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 4 }}>
+                                                {e.teamLogo && <img src={e.teamLogo} style={{ width: 12, height: 12, objectFit: 'contain' }} />}
+                                                {e.team}
+                                            </div>}
+                                        </div>
+                                    </div>
+                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, color: accent, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{e.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function GameDetailModal({ game, league, sport, espnPath, isMlbOfficial, onClose }) {
+            const [detail, setDetail] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+
+            useEffect(() => {
+                let mounted = true;
+                const load = async () => {
+                    try {
+                        // Always try ESPN API first since the game.id we have is from ESPN scoreboard.
+                        // MLB Stats API uses a different ID system (gamePk), so fetchMlbDetail with
+                        // an ESPN ID would fail.
+                        const raw = await fetchSummary(espnPath, game.id);
+                        if (!mounted) return;
+                        setDetail(parseSummary(raw, sport));
+                    } catch (e) {
+                        if (mounted) setError(e.message);
+                    } finally {
+                        if (mounted) setLoading(false);
+                    }
+                };
+                load();
+                return () => { mounted = false; };
+            }, [espnPath, game.id, sport, isMlbOfficial]);
+
+            const finished = game.status === "final" || game.status === "live";
+            const detailLabel = sport === "baseball" ? game.inning : game.minute;
+            const homeWin = finished && game.homeScore > game.awayScore;
+            const awayWin = finished && game.awayScore > game.homeScore;
+
+            return (
+                <div className="modal-backdrop" onClick={onClose}>
+                    <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+                        <div style={{ position: "sticky", top: 0, background: "rgba(10,10,10,0.95)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", borderBottom: "1px solid #1f1f1f", padding: "14px 16px", zIndex: 5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: league.accent, letterSpacing: 2 }}>GAME DETAIL</span>
+                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#666" }}>{game.date} · {game.time}</span>
+                            </div>
+                            <button onClick={onClose} style={{ background: "transparent", border: "1px solid #2a2a2a", color: "#aaa", padding: 6, display: "flex", alignItems: "center" }}><I.Close size={16} /></button>
+                        </div>
+
+                        <div style={{ padding: "20px 16px", borderBottom: "1px solid #1f1f1f", background: "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%)" }}>
+                            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                                <StatusPill status={game.status} accent={league.accent} detail={detailLabel} />
+                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 16, alignItems: "center" }}>
+                                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                    <TeamLogo url={game.awayLogo} size={40} fallback={game.away} />
+                                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: awayWin ? 900 : 700, fontSize: 18, color: awayWin ? "#fff" : "#aaa", lineHeight: 1.1, letterSpacing: 0.5, marginTop: 8 }}>{game.away}</div>
+                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 36, fontWeight: 700, color: awayWin ? league.accent : "#666", marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{game.awayScore ?? "—"}</div>
+                                </div>
+                                <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontSize: 14, color: "#444", letterSpacing: 2 }}>VS</div>
+                                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                    <TeamLogo url={game.homeLogo} size={40} fallback={game.home} />
+                                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: homeWin ? 900 : 700, fontSize: 18, color: homeWin ? "#fff" : "#aaa", lineHeight: 1.1, letterSpacing: 0.5, marginTop: 8 }}>{game.home}</div>
+                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 36, fontWeight: 700, color: homeWin ? league.accent : "#666", marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{game.homeScore ?? "—"}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grain" style={{ padding: "20px 16px", minHeight: 200 }}>
+                            {loading && (
+                                <GameDetailSkeleton accent={league.accent} />
+                            )}
+
+                            {error && <div style={{ background: "#1a0f0f", border: "1px solid #3a1f1f", padding: 14, fontSize: 12, color: "#aaa" }}>詳細データを取得できませんでした: {error}</div>}
+
+                            {detail && !loading && (
+                                <>
+                                    {/* Lineups / Rosters Block */}
+                                    {detail.lineups && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                Starting Lineups
+                                            </div>
+                                            
+                                            {sport === 'soccer' ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                                    <div>
+                                                        <div style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TeamLogo url={game.homeLogo} size={14} /> {game.homeShort} (HOME)</span>
+                                                            {detail.formations?.home && <span style={{ color: league.accent, fontFamily: "'JetBrains Mono', monospace" }}>{detail.formations.home}</span>}
+                                                        </div>
+                                                        <PitchLineup lineup={detail.lineups.home} accent={league.accent} />
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TeamLogo url={game.awayLogo} size={14} /> {game.awayShort} (AWAY)</span>
+                                                            {detail.formations?.away && <span style={{ color: league.accent, fontFamily: "'JetBrains Mono', monospace" }}>{detail.formations.away}</span>}
+                                                        </div>
+                                                        <PitchLineup lineup={detail.lineups.away} accent={league.accent} />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                                    <div>
+                                                        <div style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
+                                                            <span>{game.awayShort}</span>
+                                                        </div>
+                                                        <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                                                            {detail.lineups.away.map((p, i) => (
+                                                                <div key={i} style={{ display: 'flex', alignItems: 'center', fontSize: 11, padding: '6px 8px', borderBottom: i < detail.lineups.away.length - 1 ? '1px solid #1f1f1f' : 'none' }}>
+                                                                    <span style={{ color: '#666', fontFamily: "'JetBrains Mono', monospace", width: 14 }}>{i+1}</span>
+                                                                    <span style={{ color: league.accent, fontFamily: "'JetBrains Mono', monospace", width: 20, fontSize: 9 }}>{p.position}</span>
+                                                                    <span style={{ color: '#ddd', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
+                                                            <span>{game.homeShort}</span>
+                                                        </div>
+                                                        <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                                                            {detail.lineups.home.map((p, i) => (
+                                                                <div key={i} style={{ display: 'flex', alignItems: 'center', fontSize: 11, padding: '6px 8px', borderBottom: i < detail.lineups.home.length - 1 ? '1px solid #1f1f1f' : 'none' }}>
+                                                                    <span style={{ color: '#666', fontFamily: "'JetBrains Mono', monospace", width: 14 }}>{i+1}</span>
+                                                                    <span style={{ color: league.accent, fontFamily: "'JetBrains Mono', monospace", width: 20, fontSize: 9 }}>{p.position}</span>
+                                                                    <span style={{ color: '#ddd', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Basketball: Linescore (Q1-Q4 + OT) */}
+                                    {sport === "basketball" && detail.linescore && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                ピリオド別スコア
+                                            </div>
+                                            <BasketballLinescore linescore={detail.linescore} accent={league.accent} game={game} />
+                                        </div>
+                                    )}
+
+                                    {/* Basketball: Top scorers */}
+                                    {sport === "basketball" && detail.topScorers && (detail.topScorers.home.length > 0 || detail.topScorers.away.length > 0) && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                得点トップ
+                                            </div>
+                                            <TopScorers topScorers={detail.topScorers} accent={league.accent} game={game} />
+                                        </div>
+                                    )}
+
+                                    {/* Soccer-specific scoring display */}
+                                    {sport === "soccer" && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                得点シーン
+                                            </div>
+                                            <SoccerGoalsList scoringPlays={detail.scoringPlays} accent={league.accent} game={game} />
+                                        </div>
+                                    )}
+
+                                    {/* Baseball: Inning-by-inning linescore (1-9 + R H E) */}
+                                    {/* Baseball: Inning-by-inning linescore (1-9 + R H E) */}
+                                    {sport === "baseball" && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                イニング別スコア
+                                            </div>
+                                            {detail.linescore ? (
+                                                <BaseballLinescore linescore={detail.linescore} accent={league.accent} game={game} />
+                                            ) : (
+                                                <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center", background: "#141414", border: "1px solid #1f1f1f" }}>
+                                                    {game.status === "scheduled" ? "試合開始前です" : "イニング別データはまだ提供されていません"}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Baseball: Detailed scoring plays */}
+                                    {sport === "baseball" && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                得点経過
+                                            </div>
+                                            <BaseballScoringList scoringPlays={detail.scoringPlays} accent={league.accent} game={game} />
+                                        </div>
+                                    )}
+
+                                    {/* Other sports - generic scoring plays */}
+                                    {sport !== "soccer" && sport !== "basketball" && sport !== "baseball" && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                得点シーン
+                                            </div>
+                                            {detail.scoringPlays.length === 0 ? (
+                                                <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center", background: "#141414", border: "1px solid #1f1f1f" }}>
+                                                    {game.status === "scheduled" ? "試合開始前です" : "得点データがありません"}
+                                                </div>
+                                            ) : (
+                                                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                                    {detail.scoringPlays.map((p, i) => (
+                                                        <div key={i} style={{ display: "grid", gridTemplateColumns: "60px 1fr auto", gap: 10, padding: "10px 12px", background: "#141414", border: "1px solid #1f1f1f", borderLeft: `2px solid ${league.accent}`, alignItems: "start" }}>
+                                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: league.accent, fontWeight: 700, paddingTop: 2 }}>{p.when}</div>
+                                                            <div style={{ fontSize: 12, color: "#ddd", lineHeight: 1.5 }}>
+                                                                <div style={{ color: "#ddd", fontSize: 12 }}>{p.text}</div>
+                                                            </div>
+                                                            {p.score && <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#888", fontVariantNumeric: "tabular-nums", paddingTop: 2 }}>{p.score}</div>}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Team stats */}
+                                    {detail.teamStats && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>Team Stats</div>
+                                            <TeamStatsTable game={game} stats={detail.teamStats} />
+                                        </div>
+                                    )}
+
+                                    {/* Footer info */}
+                                    {(detail.venue || detail.attendance) && (
+                                        <div style={{ fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono', monospace", display: "flex", flexDirection: "column", gap: 4, paddingTop: 10, borderTop: "1px dashed #222" }}>
+                                            {detail.venue && <div>Venue: {detail.venue}</div>}
+                                            {detail.attendance && <div>Attendance: {Number(detail.attendance).toLocaleString()}</div>}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function BaseballLinescore({ linescore, accent, game }) {
+            if (!linescore || (!linescore.home?.length && !linescore.away?.length)) {
+                return <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center" }}>{game.status === "scheduled" ? "試合開始前です" : "イニングデータがありません"}</div>;
+            }
+            const innings = Math.max(linescore.home.length, linescore.away.length, 9);
+            const labels = [];
+            for (let i = 0; i < innings; i++) labels.push(`${i + 1}`);
+            // Columns: TEAM | 1 | 2 | ... | n | R | H | E
+            const cols = `36px ${labels.map(() => "minmax(20px, 1fr)").join(" ")} 28px 28px 28px`;
+
+            const renderCell = (val, half, inn) => {
+                // Top half not yet played by home team in current inning
+                if (val == null || val === undefined) {
+                    if (half === "home" && linescore.currentInning === inn + 1 && linescore.inningHalf === "Top" && !linescore.isComplete) return "";
+                    return "—";
+                }
+                return val;
+            };
+
+            return (
+                <div style={{ background: "#141414", border: "1px solid #1f1f1f", overflow: "auto" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: cols, padding: "10px 8px", borderBottom: "1px solid #1f1f1f", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, fontWeight: 700, minWidth: 360 }}>
+                        <span></span>
+                        {labels.map((l) => <span key={l} style={{ textAlign: "center" }}>{l}</span>)}
+                        <span style={{ textAlign: "right", color: accent }}>R</span>
+                        <span style={{ textAlign: "right", color: "#999" }}>H</span>
+                        <span style={{ textAlign: "right", color: "#999" }}>E</span>
+                    </div>
+                    {[
+                        { key: "away", name: game.awayShort || "AWAY", scores: linescore.away, total: linescore.awayTotal, hits: linescore.awayHits, errors: linescore.awayErrors },
+                        { key: "home", name: game.homeShort || "HOME", scores: linescore.home, total: linescore.homeTotal, hits: linescore.homeHits, errors: linescore.homeErrors },
+                    ].map((row, ri) => (
+                        <div key={ri} style={{ display: "grid", gridTemplateColumns: cols, padding: "12px 8px", alignItems: "center", borderBottom: ri === 0 ? "1px solid #1a1a1a" : "none", minWidth: 360 }}>
+                            <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontSize: 13, fontWeight: 800, color: "#fff", letterSpacing: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.name}</span>
+                            {labels.map((_, i) => {
+                                const v = row.scores?.[i];
+                                const isCurrent = linescore.currentInning === i + 1 && !linescore.isComplete;
+                                return (
+                                    <span key={i} style={{ textAlign: "center", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: isCurrent ? accent : "#ddd", fontWeight: isCurrent ? 800 : 600, fontVariantNumeric: "tabular-nums" }}>
+                                        {renderCell(v, row.key, i)}
+                                    </span>
+                                );
+                            })}
+                            <span style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: 15, color: accent, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>{row.total ?? "—"}</span>
+                            <span style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#aaa", fontVariantNumeric: "tabular-nums" }}>{row.hits ?? "—"}</span>
+                            <span style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#aaa", fontVariantNumeric: "tabular-nums" }}>{row.errors ?? "—"}</span>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function translateMlbEvent(eventType, isHomeRun, isGrandSlam) {
+            if (isGrandSlam) return { jp: "満塁本塁打", emoji: "💥", highlight: true };
+            if (isHomeRun) return { jp: "本塁打", emoji: "⚾", highlight: true };
+            const map = {
+                "Single": { jp: "単打", emoji: "" },
+                "Double": { jp: "二塁打", emoji: "" },
+                "Triple": { jp: "三塁打", emoji: "" },
+                "Walk": { jp: "四球", emoji: "" },
+                "Hit By Pitch": { jp: "死球", emoji: "" },
+                "Sac Fly": { jp: "犠飛", emoji: "" },
+                "Sac Bunt": { jp: "犠打", emoji: "" },
+                "Wild Pitch": { jp: "暴投", emoji: "" },
+                "Passed Ball": { jp: "捕逸", emoji: "" },
+                "Field Error": { jp: "失策", emoji: "" },
+                "Forceout": { jp: "封殺", emoji: "" },
+                "Grounded Into DP": { jp: "併殺", emoji: "" },
+                "Strikeout": { jp: "三振", emoji: "" },
+                "Groundout": { jp: "ゴロアウト", emoji: "" },
+                "Flyout": { jp: "フライアウト", emoji: "" },
+            };
+            return map[eventType] || { jp: eventType || "—", emoji: "" };
+        }
+
+        function BaseballScoringList({ scoringPlays, accent, game }) {
+            if (!scoringPlays || scoringPlays.length === 0) {
+                return <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center" }}>{game.status === "scheduled" ? "試合開始前です" : "得点データがありません"}</div>;
+            }
+            return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {scoringPlays.map((p, i) => {
+                        const tr = translateMlbEvent(p.eventType, p.isHomeRun, p.isGrandSlam);
+                        const isAway = p.homeAway === "away";
+                        return (
+                            <div key={i} style={{ background: tr.highlight ? "linear-gradient(90deg, rgba(255,77,46,0.08) 0%, transparent 60%)" : "#141414", border: tr.highlight ? `1px solid ${accent}` : "1px solid #1f1f1f", borderLeft: `3px solid ${tr.highlight ? accent : "#444"}`, padding: "12px 14px" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: accent, fontWeight: 800, letterSpacing: 0.5 }}>
+                                            {p.when}
+                                        </span>
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 0.5, padding: "2px 6px", border: "1px solid #2a2a2a" }}>
+                                            {isAway ? game.awayShort : game.homeShort}
+                                        </span>
+                                        {tr.jp && (
+                                            <span style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, color: tr.highlight ? accent : "#aaa", fontWeight: 700 }}>
+                                                {tr.emoji} {tr.jp}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {p.score && (
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#888", fontVariantNumeric: "tabular-nums", fontWeight: 700 }}>
+                                            {p.score}
+                                        </span>
+                                    )}
+                                </div>
+                                {p.batter && (
+                                    <div style={{ fontWeight: 700, color: "#fff", fontSize: 14, marginBottom: 4 }}>
+                                        {tr.highlight ? "🦸 " : "🏏 "}{p.batter}
+                                        {p.pitcher && <span style={{ fontSize: 10, color: "#666", fontWeight: 400, marginLeft: 8 }}>vs {p.pitcher}</span>}
+                                    </div>
+                                )}
+                                <div style={{ fontSize: 11, color: "#888", lineHeight: 1.5 }}>{p.text}</div>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        function SoccerGoalsList({ scoringPlays, accent, game }) {
+            if (!scoringPlays || scoringPlays.length === 0) {
+                return <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center" }}>{game.status === "scheduled" ? "試合開始前です" : "得点データがありません"}</div>;
+            }
+            return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {scoringPlays.map((p, i) => {
+                        const isHome = p.homeAway === "home";
+                        return (
+                            <div key={i} style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, padding: "12px 14px", display: "grid", gridTemplateColumns: isHome ? "1fr auto 60px" : "60px auto 1fr", gap: 10, alignItems: "center" }}>
+                                {!isHome && (
+                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: accent, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>{p.when || "—"}</div>
+                                )}
+                                <div style={{ minWidth: 0, textAlign: isHome ? "right" : "left" }}>
+                                    {p.scorer ? (
+                                        <>
+                                            <div style={{ fontWeight: 700, color: "#fff", fontSize: 14, lineHeight: 1.2, display: "flex", alignItems: "center", justifyContent: isHome ? "flex-end" : "flex-start", gap: 6 }}>
+                                                {!isHome && <span style={{ fontSize: 16 }}>⚽</span>}
+                                                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.scorer}</span>
+                                                {p.scoringType && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, fontWeight: 800, padding: "1px 5px", background: p.scoringType === "OG" ? "#aa3333" : "#666", color: "#fff", letterSpacing: 0.5 }}>{p.scoringType}</span>}
+                                                {isHome && <span style={{ fontSize: 16 }}>⚽</span>}
+                                            </div>
+                                            {p.assist && (
+                                                <div style={{ fontSize: 10, color: "#888", marginTop: 3, fontStyle: "italic" }}>
+                                                    Assist: {p.assist}
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div style={{ fontSize: 12, color: "#aaa" }}>{p.text}</div>
+                                    )}
+                                    {p.score && <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#666", marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{p.score}</div>}
+                                </div>
+                                <div style={{ fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono', monospace", textAlign: isHome ? "right" : "left", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {isHome ? game.homeShort : game.awayShort}
+                                </div>
+                                {isHome && (
+                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: accent, fontWeight: 800, fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{p.when || "—"}</div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        function BasketballLinescore({ linescore, accent, game }) {
+            if (!linescore || (!linescore.home?.length && !linescore.away?.length)) {
+                return <div style={{ fontSize: 12, color: "#666", padding: 20, textAlign: "center" }}>{game.status === "scheduled" ? "試合開始前です" : "ピリオドデータがありません"}</div>;
+            }
+            const periods = Math.max(linescore.home.length, linescore.away.length);
+            const labels = [];
+            for (let i = 0; i < periods; i++) {
+                if (i < 4) labels.push(`Q${i + 1}`);
+                else labels.push(`OT${i - 3}`);
+            }
+            const cols = `60px ${labels.map(() => "1fr").join(" ")} 50px`;
+            return (
+                <div style={{ background: "#141414", border: "1px solid #1f1f1f", overflow: "hidden" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: cols, padding: "10px 12px", borderBottom: "1px solid #1f1f1f", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, fontWeight: 700 }}>
+                        <span>TEAM</span>
+                        {labels.map((l) => <span key={l} style={{ textAlign: "center" }}>{l}</span>)}
+                        <span style={{ textAlign: "right", color: accent }}>TOT</span>
+                    </div>
+                    {[
+                        { name: game.awayShort || "AWAY", scores: linescore.away, total: linescore.awayTotal, full: game.away },
+                        { name: game.homeShort || "HOME", scores: linescore.home, total: linescore.homeTotal, full: game.home },
+                    ].map((row, ri) => (
+                        <div key={ri} style={{ display: "grid", gridTemplateColumns: cols, padding: "12px", alignItems: "center", borderBottom: ri === 0 ? "1px solid #1a1a1a" : "none" }}>
+                            <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontSize: 14, fontWeight: 800, color: "#fff", letterSpacing: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.name}</span>
+                            {labels.map((_, i) => (
+                                <span key={i} style={{ textAlign: "center", fontFamily: "'JetBrains Mono', monospace", fontSize: 14, color: "#ddd", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                                    {row.scores?.[i] ?? "—"}
+                                </span>
+                            ))}
+                            <span style={{ textAlign: "right", fontFamily: "'JetBrains Mono', monospace", fontSize: 16, color: accent, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>
+                                {row.total ?? "—"}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function TopScorers({ topScorers, accent, game }) {
+            if (!topScorers || (!topScorers.home?.length && !topScorers.away?.length)) return null;
+            return (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    {[
+                        { name: game.awayShort, players: topScorers.away },
+                        { name: game.homeShort, players: topScorers.home },
+                    ].map((side, si) => (
+                        <div key={si} style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                            <div style={{ padding: "8px 10px", borderBottom: "1px solid #1f1f1f", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, letterSpacing: 1, fontWeight: 700 }}>{side.name}</div>
+                            {(side.players || []).length === 0 ? (
+                                <div style={{ padding: 10, fontSize: 10, color: "#555" }}>—</div>
+                            ) : side.players.map((p, i) => (
+                                <div key={i} style={{ padding: "8px 10px", borderBottom: i < side.players.length - 1 ? "1px solid #1a1a1a" : "none" }}>
+                                    <div style={{ fontSize: 11, color: "#eee", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
+                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: accent, marginTop: 2 }}>{p.value}</div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function TeamStatsTable({ game, stats }) {
+            const labels = {
+                hits: "HITS", errors: "ERRORS", homeRuns: "HR", strikeOuts: "SO",
+                possessionPct: "POSS %", shotsOnTarget: "SHOTS ON TGT", fouls: "FOULS", yellowCards: "YELLOW", redCards: "RED", saves: "SAVES",
+            };
+            const keys = Object.keys(labels).filter((k) => stats.home[k] !== undefined || stats.away[k] !== undefined);
+            if (keys.length === 0) return <div style={{ fontSize: 12, color: "#666", padding: 16, textAlign: "center" }}>スタッツデータなし</div>;
+
+            return (
+                <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", padding: "8px 12px", borderBottom: "1px solid #1f1f1f", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TeamLogo url={game.awayLogo} size={12} /> {game.awayShort || "AWAY"}</span>
+                        <span style={{ textAlign: "center" }}>STAT</span>
+                        <span style={{ textAlign: "right", display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>{game.homeShort || "HOME"} <TeamLogo url={game.homeLogo} size={12} /></span>
+                    </div>
+                    {keys.map((k, i) => (
+                        <div key={k} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", padding: "10px 12px", borderBottom: i < keys.length - 1 ? "1px solid #1a1a1a" : "none", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#ddd", fontVariantNumeric: "tabular-nums" }}>{stats.away[k] ?? "—"}</span>
+                            <span style={{ textAlign: "center", fontSize: 11, color: "#888" }}>{labels[k]}</span>
+                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#ddd", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{stats.home[k] ?? "—"}</span>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function LoadingSkeleton({ view, accent, count = 4 }) {
+            if (view === "scores" || view === "schedule") {
+                return (
+                    <div>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, color: accent }}>
+                            <span className="loading-dots"><span style={{ background: accent }}></span><span style={{ background: accent }}></span><span style={{ background: accent }}></span></span>
+                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: 2, color: "#888" }}>LOADING {view.toUpperCase()}</span>
+                        </div>
+                        {Array.from({ length: count }).map((_, i) => (
+                            <div key={i} className="skeleton-card" style={{ borderLeftColor: accent, opacity: 1 - i * 0.15 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                                    <div className="skeleton" style={{ width: 80, height: 10 }} />
+                                    <div className="skeleton" style={{ width: 50, height: 14 }} />
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <div className="skeleton" style={{ width: "60%", height: 18 }} />
+                                        <div className="skeleton" style={{ width: 30, height: 22 }} />
+                                    </div>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <div className="skeleton" style={{ width: "55%", height: 18 }} />
+                                        <div className="skeleton" style={{ width: 30, height: 22 }} />
+                                    </div>
+                                </div>
+                                <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px dashed #222" }}>
+                                    <div className="skeleton" style={{ width: 100, height: 14 }} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            }
+            if (view === "standings") {
+                return (
+                    <div>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, color: accent }}>
+                            <span className="loading-dots"><span style={{ background: accent }}></span><span style={{ background: accent }}></span><span style={{ background: accent }}></span></span>
+                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: 2, color: "#888" }}>LOADING STANDINGS</span>
+                        </div>
+                        <div className="skeleton" style={{ height: 14, width: 120, marginBottom: 8 }} />
+                        <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                            {Array.from({ length: 8 }).map((_, i) => (
+                                <div key={i} style={{ display: "grid", gridTemplateColumns: "28px 1fr 60px", gap: 8, padding: "12px", borderBottom: i < 7 ? "1px solid #1a1a1a" : "none", alignItems: "center" }}>
+                                    <div className="skeleton" style={{ height: 12, width: 16 }} />
+                                    <div className="skeleton" style={{ height: 14, width: `${50 + (i * 7) % 40}%` }} />
+                                    <div className="skeleton" style={{ height: 12, width: 50 }} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
+            // leaders
+            return (
+                <div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, color: accent }}>
+                        <span className="loading-dots"><span style={{ background: accent }}></span><span style={{ background: accent }}></span><span style={{ background: accent }}></span></span>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: 2, color: "#888" }}>LOADING LEADERS</span>
+                    </div>
+                    {Array.from({ length: 3 }).map((_, ci) => (
+                        <div key={ci} style={{ background: "#141414", border: "1px solid #1f1f1f", marginBottom: 16 }}>
+                            <div style={{ padding: "10px 14px", borderBottom: "1px solid #1f1f1f" }}>
+                                <div className="skeleton" style={{ height: 16, width: 140 }} />
+                            </div>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr 60px", gap: 10, padding: "10px 14px", borderBottom: i < 4 ? "1px solid #1a1a1a" : "none", alignItems: "center" }}>
+                                    <div className="skeleton" style={{ height: 12, width: 14 }} />
+                                    <div className="skeleton" style={{ height: 13, width: `${50 + i * 8}%` }} />
+                                    <div className="skeleton" style={{ height: 14, width: 40 }} />
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function GameDetailSkeleton({ accent }) {
+            return (
+                <div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 20, color: accent }}>
+                        <span className="loading-dots"><span style={{ background: accent }}></span><span style={{ background: accent }}></span><span style={{ background: accent }}></span></span>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: 2, color: "#888" }}>LOADING DETAIL</span>
+                    </div>
+                    <div className="skeleton" style={{ height: 14, width: 120, marginBottom: 10 }} />
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} style={{ display: "grid", gridTemplateColumns: "60px 1fr auto", gap: 10, padding: "12px", background: "#141414", border: "1px solid #1f1f1f", borderLeft: `2px solid ${accent}`, marginBottom: 6 }}>
+                            <div className="skeleton" style={{ height: 12, width: 50 }} />
+                            <div>
+                                <div className="skeleton" style={{ height: 14, width: "70%", marginBottom: 6 }} />
+                                <div className="skeleton" style={{ height: 11, width: "50%" }} />
+                            </div>
+                            <div className="skeleton" style={{ height: 12, width: 30 }} />
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function WorldCupHighlights({ tournament, accent }) {
+            const matches = tournament.featuredMatches || [];
+            if (matches.length === 0) return null;
+
+            const now = new Date();
+            const startDate = new Date(tournament.tournamentStart);
+            const endDate = new Date(tournament.tournamentEnd);
+            const daysUntil = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
+            const isOngoing = now >= startDate && now <= endDate;
+            const isPast = now > endDate;
+
+            const formatJst = (iso) => {
+                const d = new Date(iso);
+                const days = ["日","月","火","水","木","金","土"];
+                return {
+                    date: `${pad(d.getMonth()+1)}/${pad(d.getDate())}`,
+                    day: days[d.getDay()],
+                    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+                };
+            };
+
+            const tagColors = { OPENING: "#FFD93D", JAPAN: "#E5253E", FINAL: "#FFD93D" };
+            const tagLabels = { OPENING: "🏆 開幕戦", JAPAN: "🇯🇵 日本代表", FINAL: "🏆 決勝" };
+
+            const japanMatches = matches.filter((m) => m.tag === "JAPAN");
+            const otherMatches = matches.filter((m) => m.tag !== "JAPAN");
+
+            return (
+                <div style={{ marginBottom: 20 }}>
+                    {/* Tournament hero card */}
+                    <div style={{ background: "linear-gradient(135deg, rgba(255,217,61,0.15) 0%, rgba(229,37,62,0.1) 100%)", border: `1px solid ${accent}`, padding: "20px 18px", marginBottom: 16, position: "relative", overflow: "hidden" }}>
+                        <div style={{ position: "absolute", top: -10, right: -10, fontSize: 80, opacity: 0.08 }}>🏆</div>
+                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, letterSpacing: 2, marginBottom: 6, fontWeight: 700 }}>FIFA WORLD CUP 2026</div>
+                        <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 900, fontSize: 26, color: "#fff", letterSpacing: 1, lineHeight: 1, marginBottom: 12 }}>
+                            🇺🇸 🇨🇦 🇲🇽 NORTH AMERICA
+                        </div>
+                        {!isPast && (
+                            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
+                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#aaa" }}>{isOngoing ? "開催中" : "開幕まで"}</span>
+                                {!isOngoing && (
+                                    <>
+                                        <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 900, fontSize: 32, color: accent, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{daysUntil}</span>
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#aaa" }}>日</span>
+                                    </>
+                                )}
+                                {isOngoing && <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 900, fontSize: 22, color: accent }}>LIVE TOURNAMENT</span>}
+                            </div>
+                        )}
+                        <div style={{ fontSize: 11, color: "#888", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 0.5 }}>
+                            2026.06.11 — 07.19 · 48 TEAMS · 104 MATCHES
+                        </div>
+                    </div>
+
+                    {/* Japan matches */}
+                    {japanMatches.length > 0 && (
+                        <div style={{ marginBottom: 16 }}>
+                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: 2, color: "#E5253E", marginBottom: 8, textTransform: "uppercase", display: "flex", alignItems: "center", gap: 8 }}>
+                                🇯🇵 日本代表 · GROUP F
+                            </div>
+                            {japanMatches.map((m, i) => {
+                                const t = formatJst(m.date);
+                                const isPastMatch = new Date(m.date) < now;
+                                return (
+                                    <div key={i} style={{ background: "#141414", border: "1px solid rgba(229,37,62,0.4)", borderLeft: "3px solid #E5253E", padding: "12px 14px", marginBottom: 6, opacity: isPastMatch ? 0.55 : 1 }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#E5253E", fontWeight: 700, letterSpacing: 0.5 }}>
+                                                MATCH {i + 1} · {t.date} ({t.day}) {t.time}
+                                            </div>
+                                            {isPastMatch && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1 }}>FINISHED</span>}
+                                        </div>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                                            <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontSize: 18, fontWeight: m.away === "Japan" ? 900 : 700, color: m.away === "Japan" ? "#fff" : "#aaa", letterSpacing: 0.5 }}>{m.away}</span>
+                                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#555" }}>vs</span>
+                                            <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontSize: 18, fontWeight: m.home === "Japan" ? 900 : 700, color: m.home === "Japan" ? "#fff" : "#aaa", letterSpacing: 0.5 }}>{m.home}</span>
+                                        </div>
+                                        <div style={{ marginTop: 8, fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 0.3 }}>📍 {m.venue}</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Other featured matches */}
+                    {otherMatches.length > 0 && (
+                        <div style={{ marginBottom: 16 }}>
+                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: 2, color: accent, marginBottom: 8, textTransform: "uppercase" }}>
+                                🏆 注目試合
+                            </div>
+                            {otherMatches.map((m, i) => {
+                                const t = formatJst(m.date);
+                                const isPastMatch = new Date(m.date) < now;
+                                const tagColor = tagColors[m.tag] || accent;
+                                return (
+                                    <div key={i} style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${tagColor}`, padding: "12px 14px", marginBottom: 6, opacity: isPastMatch ? 0.55 : 1 }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                                            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                                <span style={{ background: tagColor, color: "#0a0a0a", padding: "2px 8px", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, fontWeight: 800, letterSpacing: 1 }}>{tagLabels[m.tag]}</span>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#aaa" }}>{t.date} ({t.day}) {t.time}</span>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                                            <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontSize: 18, fontWeight: 700, color: "#ddd", letterSpacing: 0.5 }}>{m.away}</span>
+                                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#555" }}>vs</span>
+                                            <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontSize: 18, fontWeight: 700, color: "#ddd", letterSpacing: 0.5 }}>{m.home}</span>
+                                        </div>
+                                        <div style={{ marginTop: 8, fontSize: 10, color: "#666", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 0.3 }}>📍 {m.venue}</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* All groups (collapsible) */}
+                    <WorldCupGroups groups={WC2026_GROUPS} accent={accent} />
+
+                    <div style={{ padding: 12, background: "rgba(255,255,255,0.02)", border: "1px dashed #2a2a2a", fontSize: 10, color: "#666", lineHeight: 1.6, fontFamily: "'JetBrains Mono', monospace" }}>
+                        ※ 時刻はすべて日本時間 (JST)<br />
+                        ※ 開幕後はESPN APIから全104試合のデータが自動取得されます
+                    </div>
+                </div>
+            );
+        }
+
+        function WorldCupGroups({ groups, accent }) {
+            const [expandedId, setExpandedId] = useState("F"); // Default: Japan's group expanded
+            const days = ["日","月","火","水","木","金","土"];
+            const fmtDate = (iso) => {
+                const d = new Date(iso);
+                return `${pad(d.getMonth()+1)}/${pad(d.getDate())} (${days[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            };
+            const now = new Date();
+
+            return (
+                <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, letterSpacing: 2, color: accent, marginBottom: 8, textTransform: "uppercase" }}>
+                        📊 全グループ日程
+                    </div>
+                    {groups.map((g) => {
+                        const isExpanded = expandedId === g.id;
+                        const hasJapan = g.teams.includes("Japan");
+                        return (
+                            <div key={g.id} style={{ marginBottom: 4 }}>
+                                <button
+                                    onClick={() => setExpandedId(isExpanded ? null : g.id)}
+                                    className="clickable"
+                                    style={{ width: "100%", background: isExpanded ? "#1a1a1a" : "#141414", border: "1px solid #1f1f1f", borderLeft: hasJapan ? "3px solid #E5253E" : `3px solid ${isExpanded ? accent : "#333"}`, padding: "10px 14px", textAlign: "left", color: "inherit", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, cursor: "pointer" }}
+                                >
+                                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
+                                        <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 900, fontSize: 18, color: hasJapan ? "#E5253E" : (isExpanded ? accent : "#aaa"), letterSpacing: 1, minWidth: 22 }}>
+                                            {g.id}
+                                        </span>
+                                        <div style={{ fontSize: 11, color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "'Manrope', sans-serif" }}>
+                                            {g.teams.map((t) => t === "Japan" ? "🇯🇵 Japan" : t).join(" · ")}
+                                        </div>
+                                    </div>
+                                    <span style={{ color: isExpanded ? accent : "#555", fontSize: 12, fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>
+                                        {isExpanded ? "▼" : "▶"}
+                                    </span>
+                                </button>
+                                {isExpanded && (
+                                    <div style={{ background: "#0d0d0d", border: "1px solid #1f1f1f", borderTop: "none", padding: "8px 12px" }}>
+                                        {g.matches
+                                            .slice()
+                                            .sort((a, b) => new Date(a.date) - new Date(b.date))
+                                            .map((m, i) => {
+                                                const isJapanMatch = m.away === "Japan" || m.home === "Japan";
+                                                const isPast = new Date(m.date) < now;
+                                                return (
+                                                    <div key={i} style={{ padding: "8px 0", borderBottom: i < g.matches.length - 1 ? "1px solid #1a1a1a" : "none", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, opacity: isPast ? 0.45 : 1 }}>
+                                                        <div style={{ minWidth: 0, flex: 1 }}>
+                                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: isJapanMatch ? "#E5253E" : "#666", letterSpacing: 0.5, marginBottom: 3 }}>
+                                                                {fmtDate(m.date)}{isPast ? " · 終了" : ""}
+                                                            </div>
+                                                            <div style={{ fontSize: 12, color: "#ddd", fontFamily: "'Manrope', sans-serif", fontWeight: isJapanMatch ? 700 : 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                                                {m.away === "Japan" ? "🇯🇵 " : ""}{m.away}
+                                                                <span style={{ color: "#555", margin: "0 6px" }}>vs</span>
+                                                                {m.home === "Japan" ? "🇯🇵 " : ""}{m.home}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        function NpbFallback({ league, view }) {
+            const links = [
+                { name: "NPB公式", url: "https://npb.jp/", desc: "公式試合結果・日程" },
+                { name: "スポーツナビ", url: "https://baseball.yahoo.co.jp/npb/", desc: "速報・成績・選手情報" },
+                { name: "Yahoo!スポーツ", url: "https://sports.yahoo.co.jp/baseball/", desc: "リアルタイムスコア" },
+            ];
+            const viewLabel = { scores: "試合結果・速報", schedule: "試合日程", leaders: "個人成績・タイトル" }[view] || "情報";
+            return (
+                <div>
+                    <div style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${league.accent}`, padding: 20, marginBottom: 12 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                            <div style={{ width: 36, height: 36, borderRadius: 4, background: "rgba(229,37,62,0.15)", border: `1px solid ${league.accent}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>⚾</div>
+                            <div>
+                                <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 18, color: "#fff", letterSpacing: 1, lineHeight: 1.1 }}>NPB {viewLabel.toUpperCase()}</div>
+                                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, marginTop: 4 }}>EXTERNAL SOURCES</div>
+                            </div>
+                        </div>
+                        <div style={{ fontSize: 12, color: "#aaa", lineHeight: 1.6, marginBottom: 4 }}>
+                            日本プロ野球の{viewLabel}は無料公開APIが提供されていないため、
+                            このアプリ内では表示できません。下記の信頼できる外部ソースから確認できます。
+                        </div>
+                        <div style={{ fontSize: 11, color: "#666", lineHeight: 1.5 }}>
+                            ※ 順位表のみ <span style={{ color: league.accent, fontFamily: "'JetBrains Mono', monospace" }}>npb-result API</span> 経由で対応
+                        </div>
+                    </div>
+
+                    {links.map((link, i) => (
+                        <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="clickable" style={{ display: "block", background: "#141414", border: "1px solid #1f1f1f", padding: "14px 16px", marginBottom: 6, textDecoration: "none", color: "inherit" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                                <div style={{ minWidth: 0 }}>
+                                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: 1, marginBottom: 2 }}>{link.name}</div>
+                                    <div style={{ fontSize: 11, color: "#888" }}>{link.desc}</div>
+                                </div>
+                                <div style={{ color: league.accent, flexShrink: 0 }}>
+                                    <I.Ext size={16} />
+                                </div>
+                            </div>
+                        </a>
+                    ))}
+
+                    <div style={{ marginTop: 16, padding: 14, background: "rgba(229,37,62,0.05)", border: "1px dashed rgba(229,37,62,0.3)" }}>
+                        <div style={{ fontSize: 10, color: league.accent, fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1, marginBottom: 8, fontWeight: 700 }}>
+                            日本での主な配信
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                            {(league.broadcasts || []).map((b, i) => <BroadcastBadge key={i} broadcast={b} />)}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function FallbackPanel({ league }) {
+            return (
+                <div style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${league.accent}`, padding: 20 }}>
+                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 18, color: "#fff", letterSpacing: 1, marginBottom: 8 }}>データ未対応</div>
+                    <div style={{ fontSize: 13, color: "#aaa", lineHeight: 1.6, marginBottom: 16 }}>{league.short} は無料の公開APIで対応してないため、ライブデータを表示できません。</div>
+                    {league.fallbackUrl && <a href={league.fallbackUrl} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "rgba(255,255,255,0.05)", border: "1px solid #333", color: "#eee", textDecoration: "none", fontSize: 11, fontFamily: "'JetBrains Mono', monospace", letterSpacing: 0.5 }}>公式サイトを開く <I.Ext size={10} /></a>}
+                </div>
+            );
+        }
+
+        // -----------------------------
+        // Main App
+        // -----------------------------
+        function SportsHub() {
+            const [leagueId, setLeagueId] = useState("mlb");
+            const [soccerSubId, setSoccerSubId] = useState("epl");
+            const [intlSubId, setIntlSubId] = useState("wc");
+            const [view, setView] = useState("scores");
+            const [scoreDateOffset, setScoreDateOffset] = useState(0);
+            const [data, setData] = useState({});
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(null);
+            const [selectedGame, setSelectedGame] = useState(null);
+            // New: favorites, search, JP filter
+            const [storage, setStorage] = useState(() => loadStorage());
+            const [searchOpen, setSearchOpen] = useState(false);
+            const [searchQuery, setSearchQuery] = useState("");
+            const [jpFilter, setJpFilter] = useState(storage.jpFilter);
+
+            // Persist storage on change
+            useEffect(() => { saveStorage({ ...storage, jpFilter }); }, [storage, jpFilter]);
+
+            const toggleFavTeam = useCallback((teamName) => {
+                setStorage((s) => {
+                    const exists = s.favTeams.includes(teamName);
+                    return { ...s, favTeams: exists ? s.favTeams.filter((t) => t !== teamName) : [...s.favTeams, teamName] };
+                });
+            }, []);
+            const isFavTeam = useCallback((teamName) => storage.favTeams.includes(teamName), [storage.favTeams]);
+
+            const league = LEAGUES.find((l) => l.id === leagueId);
+            const isCategory = league.isCategory;
+            const subId = leagueId === "intl_soccer" ? soccerSubId : leagueId === "intl_cup" ? intlSubId : null;
+            const setSubId = leagueId === "intl_soccer" ? setSoccerSubId : leagueId === "intl_cup" ? setIntlSubId : () => {};
+
+            const subLeague = isCategory && league.subLeagues ? league.subLeagues.find((s) => s.id === subId) : null;
+
+            const effective = useMemo(() => {
+                return subLeague ? {
+                    name: subLeague.name, espn: subLeague.espn, isMlbOfficial: subLeague.isMlbOfficial, isNpb: subLeague.isNpb, apiFootballId: subLeague.apiFootballId, broadcasts: subLeague.broadcasts, sport: subLeague.sport || league.sport, short: subLeague.short, fallbackUrl: subLeague.fallbackUrl,
+                    featuredMatches: subLeague.featuredMatches, tournamentStart: subLeague.tournamentStart, tournamentEnd: subLeague.tournamentEnd,
+                } : {
+                    name: league.name, espn: league.espn, isMlbOfficial: league.isMlbOfficial, isNpb: league.isNpb, apiFootballId: league.apiFootballId, broadcasts: league.broadcasts, sport: league.sport, short: league.short, fallbackUrl: league.fallbackUrl,
+                };
+            }, [league, subLeague]);
+
+            const offsetSuffix = view === "scores" ? `:${scoreDateOffset}` : "";
+            const cacheKey = isCategory ? `${leagueId}:${subId}:${view}${offsetSuffix}` : `${leagueId}:${view}${offsetSuffix}`;
+            const current = data[cacheKey];
+            const currentDataRef = useRef(data);
+            useEffect(() => { currentDataRef.current = data; }, [data]);
+
+            const effEspn = effective.espn;
+            const effMlb = effective.isMlbOfficial;
+            const effNpb = effective.isNpb;
+            const effApiFb = effective.apiFootballId;
+            const effSport = effective.sport;
+            const effBroadcasts = effective.broadcasts;
+
+            const load = useCallback(async (force = false) => {
+                // Always clear stale error/loading on navigation, even if cache hits
+                setError(null);
+                if (!force && currentDataRef.current[cacheKey]) return;
+                if (!effEspn && !effNpb) { return; }
+                
+                setLoading(true);
+                setError(null);
+
+                try {
+                    let result;
+                    if (effNpb) {
+                        if (view === "standings") {
+                            const [clRes, plRes] = await Promise.all([
+                                fetch("https://npb-result.ant-npb.workers.dev/api/cl"),
+                                fetch("https://npb-result.ant-npb.workers.dev/api/pl")
+                            ]);
+                            if (!clRes.ok || !plRes.ok) throw new Error("NPB APIエラー");
+                            const clData = await clRes.json();
+                            const plData = await plRes.json();
+                            
+                            result = {
+                                groups: [
+                                    { name: "セ・リーグ", teams: clData.map(t => ({ rank: t.rank, team: t.name, logo: null, wins: t.win, losses: t.lose, gamesBack: String(t.gamesBehind) })) },
+                                    { name: "パ・リーグ", teams: plData.map(t => ({ rank: t.rank, team: t.name, logo: null, wins: t.win, losses: t.lose, gamesBack: String(t.gamesBehind) })) }
+                                ]
+                            };
+                        } else {
+                            // NPB has no public API for scores/leaders/schedule
+                            // Set fallback flag instead of throwing error
+                            result = { npbFallback: true, view };
+                        }
+                    } else if (effEspn) {
+                        if (view === "standings") {
+                            const raw = await fetchStandings(effEspn);
+                            result = { groups: parseStandings(raw, effSport) };
+                        } else if (view === "leaders") {
+                            const raw = await fetchLeaders(effEspn, effSport);
+                            result = { categories: parseLeaders(raw, effSport) };
+                        } else {
+                            // scores or schedule
+                            const raw = await fetchScoreboard(effEspn, view, scoreDateOffset);
+                            const events = (raw.events || []).map((e) => parseGame(e, effSport, effBroadcasts)).filter(Boolean);
+                            if (view === "scores") result = { games: events };
+                            else result = { upcoming: events };
+                        }
+                    }
+                    setData((prev) => ({ ...prev, [cacheKey]: result }));
+                } catch (e) {
+                    console.error(e);
+                    setError(e.message || "Failed to load");
+                } finally {
+                    setLoading(false);
+                }
+            }, [cacheKey, effEspn, effMlb, effNpb, effApiFb, effSport, effBroadcasts, view, scoreDateOffset]);
+
+            useEffect(() => { load(); }, [load]);
+
+            // 30秒ごとのリアルタイム更新機能
+            useEffect(() => {
+                if (!effEspn && !effNpb) return;
+                if (selectedGame || view !== "scores") return;
+
+                const intervalId = setInterval(() => {
+                    load(true);
+                }, 30000);
+
+                return () => clearInterval(intervalId);
+            }, [load, effEspn, effNpb, selectedGame, view]);
+
+            const noData = !effEspn && !effNpb;
+
+            return (
+                <div className="app-shell fade-in">
+                    <div className="safe-header" style={{ position: "sticky", top: 0, zIndex: 10, background: "rgba(10,10,10,0.85)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderBottom: "1px solid #1a1a1a" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 16px 12px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <div style={{ width: 24, height: 24, borderRadius: 4, background: league.accent, display: "flex", alignItems: "center", justifyContent: "center", color: "#0a0a0a" }}>
+                                    {league.sport === "soccer" ? <I.Ball size={14} /> : <I.Activity size={14} />}
+                                </div>
+                                <h1 style={{ margin: 0, fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 900, fontSize: 24, letterSpacing: 1, color: "#fff", lineHeight: 1 }}>SCORE<span style={{ color: league.accent }}>HUB</span></h1>
+                            </div>
+                            <div style={{ display: "flex", gap: 6 }}>
+                                <button
+                                    onClick={() => setJpFilter((v) => !v)}
+                                    style={{ background: jpFilter ? "#E5253E" : "transparent", border: `1px solid ${jpFilter ? "#E5253E" : "#2a2a2a"}`, color: jpFilter ? "#fff" : "#999", padding: "6px 8px", display: "flex", alignItems: "center", gap: 4, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 700, letterSpacing: 0.5 }}
+                                    aria-label="Filter Japanese players"
+                                    title="日本人選手・日本代表のみ表示"
+                                >
+                                    🇯🇵 JP
+                                </button>
+                                <button
+                                    onClick={() => { setSearchOpen((v) => !v); if (searchOpen) setSearchQuery(""); }}
+                                    style={{ background: searchOpen ? league.accent : "transparent", border: `1px solid ${searchOpen ? league.accent : "#2a2a2a"}`, color: searchOpen ? "#0a0a0a" : "#999", padding: 8, display: "flex", alignItems: "center" }}
+                                    aria-label="Search"
+                                >
+                                    <I.Search size={14} />
+                                </button>
+                                <button onClick={() => load(true)} disabled={loading || noData} style={{ background: "transparent", border: "1px solid #2a2a2a", color: noData ? "#444" : "#999", padding: 8, borderRadius: 0, display: "flex", alignItems: "center" }} aria-label="Refresh">
+                                    <I.Refresh size={14} style={loading ? { animation: "spin 1s linear infinite" } : {}} />
+                                </button>
+                            </div>
+                        </div>
+                        {searchOpen && (
+                            <div style={{ padding: "0 16px 12px" }}>
+                                <input
+                                    type="text"
+                                    autoFocus
+                                    placeholder="チーム名で検索..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    style={{ width: "100%", background: "#0a0a0a", border: "1px solid #2a2a2a", color: "#eee", padding: "8px 12px", fontFamily: "'Manrope', sans-serif", fontSize: 13, outline: "none" }}
+                                />
+                            </div>
+                        )}
+                        <div className="scrollx" style={{ display: "flex", overflowX: "auto", marginLeft: -16, marginRight: -16, paddingLeft: 16, paddingRight: 16 }}>
+                            {LEAGUES.map((l) => {
+                                const active = l.id === leagueId;
+                                return (
+                                    <button key={l.id} onClick={() => setLeagueId(l.id)} style={{ background: "none", border: "none", padding: "10px 14px 12px", borderBottom: active ? `2px solid ${l.accent}` : "2px solid transparent", color: active ? "#fff" : "#666", flexShrink: 0, fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: active ? 800 : 600, fontSize: 16, letterSpacing: 1, transition: "color 0.2s", whiteSpace: "nowrap" }}>
+                                        {l.short}<span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: "#555", marginLeft: 6, letterSpacing: 0.5 }}>{l.region}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {isCategory && league.subLeagues && (
+                        <div style={{ borderBottom: "1px solid #1a1a1a", background: "#0d0d0d" }}>
+                            <div className="scrollx" style={{ display: "flex", gap: 4, padding: "8px 16px", overflowX: "auto" }}>
+                                {league.subLeagues.map((sl) => {
+                                    const active = sl.id === subId;
+                                    return (
+                                        <button key={sl.id} onClick={() => setSubId(sl.id)} style={{ background: active ? league.accent : "transparent", color: active ? "#0a0a0a" : "#888", border: `1px solid ${active ? league.accent : "#222"}`, padding: "5px 10px", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: 0.5, whiteSpace: "nowrap", transition: "all 0.2s" }}>
+                                            {sl.short}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", borderBottom: "1px solid #1a1a1a", background: "#0d0d0d" }}>
+                        {VIEWS.map((v) => {
+                            const active = view === v.id;
+                            const Icon = v.icon;
+                            return (
+                                <button key={v.id} onClick={() => setView(v.id)} style={{ background: active ? "rgba(255,255,255,0.03)" : "none", border: "none", padding: "12px 0", color: active ? "#fff" : "#666", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, transition: "all 0.2s" }}>
+                                    <Icon size={16} style={{ color: active ? league.accent : "inherit" }} />
+                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, fontWeight: active ? 700 : 400, letterSpacing: 1 }}>{v.label.toUpperCase()}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div style={{ padding: "16px 16px 8px", display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ width: 4, height: 4, borderRadius: "50%", background: league.accent }} />
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#888", letterSpacing: 1 }}>{effective.name.toUpperCase()}</span>
+                    </div>
+
+                    <div className="grain" style={{ padding: 16, minHeight: 400 }}>
+                        {noData && <FallbackPanel league={effective} />}
+
+                        {!noData && loading && !current && (
+                            <LoadingSkeleton view={view} accent={league.accent} />
+                        )}
+
+                        {!noData && error && (
+                            <div style={{ background: "#1a0f0f", border: "1px solid #3a1f1f", padding: 16, display: "flex", gap: 10, alignItems: "flex-start" }}>
+                                <I.Alert size={16} color="#ff4444" style={{ flexShrink: 0 }} />
+                                <div style={{ fontSize: 13, color: "#ff8888", lineHeight: 1.5 }}>{error}</div>
+                            </div>
+                        )}
+
+                        {!noData && current && !error && (
+                            <div className="fade-in">
+                                {current.npbFallback && <NpbFallback league={league} view={view} />}
+                                {!current.npbFallback && view === "scores" && (
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, background: "#111", padding: "8px 12px", borderRadius: 4, border: "1px solid #1f1f1f", gap: 8 }}>
+                                        <button onClick={() => setScoreDateOffset(o => o - 1)} style={{ background: "none", border: "none", color: league.accent, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 12, padding: "4px 8px", flexShrink: 0 }}>← PREV</button>
+                                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 0, flex: 1, position: "relative" }}>
+                                            <button
+                                                onClick={(e) => {
+                                                    const picker = e.currentTarget.parentElement.querySelector('input[type="date"]');
+                                                    if (!picker) return;
+                                                    if (typeof picker.showPicker === 'function') {
+                                                        try { picker.showPicker(); } catch { picker.click(); }
+                                                    } else { picker.click(); }
+                                                }}
+                                                style={{ background: "none", border: "1px dashed transparent", padding: "2px 8px", display: "flex", alignItems: "center", gap: 6, color: "#eee", fontFamily: "'JetBrains Mono', monospace", fontSize: 12, whiteSpace: "nowrap", cursor: "pointer" }}
+                                                onMouseEnter={(e) => e.currentTarget.style.borderColor = league.accent}
+                                                onMouseLeave={(e) => e.currentTarget.style.borderColor = "transparent"}
+                                            >
+                                                📅 {(() => {
+                                                    const d = new Date();
+                                                    d.setDate(d.getDate() + scoreDateOffset);
+                                                    const day = ["SUN","MON","TUE","WED","THU","FRI","SAT"][d.getDay()];
+                                                    return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${day}`;
+                                                })()}
+                                            </button>
+                                            <input
+                                                type="date"
+                                                value={(() => {
+                                                    const d = new Date();
+                                                    d.setDate(d.getDate() + scoreDateOffset);
+                                                    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+                                                })()}
+                                                onChange={(e) => {
+                                                    if (!e.target.value) return;
+                                                    const sel = new Date(e.target.value + 'T00:00:00');
+                                                    const tod = new Date();
+                                                    tod.setHours(0,0,0,0);
+                                                    sel.setHours(0,0,0,0);
+                                                    const diff = Math.round((sel - tod) / 86400000);
+                                                    setScoreDateOffset(diff);
+                                                }}
+                                                style={{ position: "absolute", opacity: 0, width: 1, height: 1, pointerEvents: "none" }}
+                                                tabIndex={-1}
+                                                aria-hidden="true"
+                                            />
+                                            {scoreDateOffset !== 0 && (
+                                                <button onClick={() => setScoreDateOffset(0)} style={{ background: league.accent, border: "none", color: "#0a0a0a", fontFamily: "'JetBrains Mono', monospace", fontWeight: 800, fontSize: 9, letterSpacing: 1, padding: "3px 10px", borderRadius: 2, cursor: "pointer" }}>
+                                                    ⊙ TODAY
+                                                </button>
+                                            )}
+                                            {scoreDateOffset === 0 && (
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: "#555", letterSpacing: 1 }}>TODAY · TAP DATE TO JUMP</span>
+                                            )}
+                                        </div>
+                                        <button onClick={() => setScoreDateOffset(o => o + 1)} style={{ background: "none", border: "none", color: league.accent, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 12, padding: "4px 8px", flexShrink: 0 }}>NEXT →</button>
+                                    </div>
+                                )}
+                                {/* World Cup highlights for intl_cup + wc */}
+                                {effective.featuredMatches && (view === "scores" || view === "schedule") && (
+                                    <WorldCupHighlights tournament={effective} accent={league.accent} />
+                                )}
+
+                                {!current.npbFallback && view === "scores" && (() => {
+                                    let games = current.games || [];
+                                    // JP filter
+                                    if (jpFilter) {
+                                        games = games.filter((g) => getJpPlayers(g.home, g.away).length > 0);
+                                    }
+                                    // Search filter
+                                    if (searchQuery.trim()) {
+                                        const q = searchQuery.toLowerCase();
+                                        games = games.filter((g) => (g.home || "").toLowerCase().includes(q) || (g.away || "").toLowerCase().includes(q));
+                                    }
+                                    // Sort: favorites & JP games first
+                                    const sorted = [...games].sort((a, b) => {
+                                        const aFav = isFavTeam(a.home) || isFavTeam(a.away);
+                                        const bFav = isFavTeam(b.home) || isFavTeam(b.away);
+                                        if (aFav !== bFav) return aFav ? -1 : 1;
+                                        const aJp = getJpPlayers(a.home, a.away).length > 0;
+                                        const bJp = getJpPlayers(b.home, b.away).length > 0;
+                                        if (aJp !== bJp) return aJp ? -1 : 1;
+                                        return 0;
+                                    });
+                                    if (sorted.length === 0) return <div style={{ textAlign: "center", padding: 40, color: "#555" }}>{searchQuery || jpFilter ? "条件に合う試合が見つかりません" : "No games today."}</div>;
+                                    return sorted.map((g) => (
+                                        <GameCard
+                                            key={g.id}
+                                            game={g}
+                                            accent={league.accent}
+                                            sport={effective.sport}
+                                            onClick={() => setSelectedGame(g)}
+                                            isFav={isFavTeam}
+                                            onToggleFav={toggleFavTeam}
+                                            jpPlayers={getJpPlayers(g.home, g.away)}
+                                        />
+                                    ));
+                                })()}
+
+                                {!current.npbFallback && view === "standings" && <StandingsTable groups={current.groups} accent={league.accent} sport={effective.sport} />}
+
+                                {!current.npbFallback && view === "schedule" && current.upcoming?.length === 0 && <div style={{ textAlign: "center", padding: 40, color: "#555" }}>No upcoming games scheduled.</div>}
+                                {!current.npbFallback && view === "schedule" && <ScheduleList upcoming={current.upcoming} accent={league.accent} onSelect={(g) => setSelectedGame(g)} />}
+
+                                {!current.npbFallback && view === "leaders" && <LeadersBoard categories={current.categories} accent={league.accent} />}
+                            </div>
+                        )}
+
+                        <div style={{ marginTop: 40, padding: "20px 0", borderTop: "1px solid #1a1a1a", textAlign: "center" }}>
+                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#444", letterSpacing: 2, lineHeight: 1.8 }}>
+                                DATA · ESPN PUBLIC API {effective.isMlbOfficial ? "& MLB STATS API" : ""} {effective.isNpb ? "& NPB UNOFFICIAL API" : ""}
+                                <br />配信情報は概算です・試合により異なる場合あり
+                            </div>
+                        </div>
+                    </div>
+
+                    {selectedGame && (effective.espn || effective.isMlbOfficial) && (
+                        <GameDetailModal
+                            game={selectedGame}
+                            league={{ ...league, accent: league.accent }}
+                            sport={effective.sport}
+                            espnPath={effective.espn}
+                            isMlbOfficial={effective.isMlbOfficial}
+                            onClose={() => setSelectedGame(null)}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById("root")).render(<SportsHub />);
+    </script>
+</body>
+
+</html>>
     <meta name="mobile-web-app-capable" content="yes" />
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial Black,sans-serif' font-size='60' font-weight='900' fill='%23FF4D2E' text-anchor='middle' dominant-baseline='central'%3ESH%3C/text%3E%3C/svg%3E" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial Black,sans-serif' font-size='14' font-weight='900' fill='%23FF4D2E' text-anchor='middle' dominant-baseline='central'%3ESH%3C/text%3E%3C/svg%3E" />

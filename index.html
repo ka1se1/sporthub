@@ -84,6 +84,114 @@
             50% { opacity: 0.8; }
         }
 
+        /* New animations */
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
+            50% { box-shadow: 0 0 16px rgba(255,255,255,0.08); }
+        }
+        @keyframes shimmerGold {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.94); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        @keyframes scoreFlash {
+            0% { background-color: rgba(255,255,255,0); }
+            30% { background-color: rgba(255,255,255,0.08); }
+            100% { background-color: rgba(255,255,255,0); }
+        }
+        @keyframes liveDot {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(229,37,62,0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(229,37,62,0); }
+        }
+
+        /* Stagger children */
+        .stagger > * {
+            animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.25, 1) backwards;
+        }
+        .stagger > *:nth-child(1) { animation-delay: 0.04s; }
+        .stagger > *:nth-child(2) { animation-delay: 0.08s; }
+        .stagger > *:nth-child(3) { animation-delay: 0.12s; }
+        .stagger > *:nth-child(4) { animation-delay: 0.16s; }
+        .stagger > *:nth-child(5) { animation-delay: 0.20s; }
+        .stagger > *:nth-child(6) { animation-delay: 0.24s; }
+        .stagger > *:nth-child(7) { animation-delay: 0.28s; }
+        .stagger > *:nth-child(8) { animation-delay: 0.32s; }
+        .stagger > *:nth-child(9) { animation-delay: 0.36s; }
+        .stagger > *:nth-child(10) { animation-delay: 0.40s; }
+        .stagger > *:nth-child(11) { animation-delay: 0.44s; }
+        .stagger > *:nth-child(12) { animation-delay: 0.48s; }
+
+        .scale-in { animation: scaleIn 0.35s cubic-bezier(0.2, 0.8, 0.25, 1) backwards; }
+        .slide-left { animation: slideInLeft 0.35s cubic-bezier(0.2, 0.8, 0.25, 1) backwards; }
+        .slide-right { animation: slideInRight 0.35s cubic-bezier(0.2, 0.8, 0.25, 1) backwards; }
+        .float-anim { animation: float 2.4s ease-in-out infinite; }
+
+        /* Hover micro-interactions */
+        .clickable { transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.25, 1), border-color 0.2s, background-color 0.2s, box-shadow 0.2s; }
+        .clickable:hover { background-color: #1a1a1a !important; }
+        .clickable:active { transform: scale(0.985); }
+
+        /* Live game card pulses subtly */
+        .live-card {
+            position: relative;
+            animation: glow 2.4s ease-in-out infinite;
+        }
+        .live-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #E5253E, transparent);
+            background-size: 200% 100%;
+            animation: shimmerGold 2s linear infinite;
+        }
+
+        /* Tab indicator slide */
+        .tab-active { position: relative; }
+        .tab-active::after {
+            content: "";
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: currentColor;
+            animation: slideInLeft 0.3s cubic-bezier(0.2, 0.8, 0.25, 1);
+        }
+
+        /* Score number transition */
+        .score-num {
+            transition: color 0.3s, transform 0.2s;
+            display: inline-block;
+        }
+
+        /* Podium gradients */
+        .podium-1 {
+            background: linear-gradient(145deg, rgba(255,215,0,0.18), rgba(255,140,0,0.06));
+            border-color: rgba(255,215,0,0.5) !important;
+        }
+        .podium-2 {
+            background: linear-gradient(145deg, rgba(192,192,192,0.15), rgba(160,160,160,0.05));
+            border-color: rgba(192,192,192,0.4) !important;
+        }
+        .podium-3 {
+            background: linear-gradient(145deg, rgba(205,127,50,0.15), rgba(160,82,45,0.05));
+            border-color: rgba(205,127,50,0.4) !important;
+        }
+
         .skeleton {
             background: linear-gradient(90deg, #161616 0%, #1f1f1f 50%, #161616 100%);
             background-size: 200% 100%;
@@ -380,12 +488,12 @@
         // League configs
         // -----------------------------
         const SOCCER_LEAGUES = [
-            { id: "epl",        short: "EPL",  name: "Premier League",        country: "England", espn: "soccer/eng.1",          apiFootballId: 39,  fdId: "PL",  broadcasts: ["SPOTV NOW", "U-NEXT"] },
-            { id: "laliga",     short: "LIGA", name: "La Liga",               country: "Spain",   espn: "soccer/esp.1",          apiFootballId: 140, fdId: "PD",  broadcasts: ["WOWOW", "U-NEXT"] },
-            { id: "seriea",     short: "SERA", name: "Serie A",               country: "Italy",   espn: "soccer/ita.1",          apiFootballId: 135, fdId: "SA",  broadcasts: ["DAZN"] },
-            { id: "bundesliga", short: "BUND", name: "Bundesliga",            country: "Germany", espn: "soccer/ger.1",          apiFootballId: 78,  fdId: "BL1", broadcasts: ["SPOTV NOW", "スカパー!"] },
-            { id: "ligue1",     short: "L1",   name: "Ligue 1",               country: "France",  espn: "soccer/fra.1",          apiFootballId: 61,  fdId: "FL1", broadcasts: ["DAZN", "ABEMA"] },
-            { id: "ucl",        short: "UCL",  name: "UEFA Champions League", country: "Europe",  espn: "soccer/uefa.champions", apiFootballId: 2,   fdId: "CL",  broadcasts: ["WOWOW", "U-NEXT"] },
+            { id: "epl",        short: "EPL",  name: "Premier League",        country: "England", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", espn: "soccer/eng.1",          apiFootballId: 39,  fdId: "PL",  broadcasts: ["SPOTV NOW", "U-NEXT"] },
+            { id: "laliga",     short: "LIGA", name: "La Liga",               country: "Spain",   flag: "🇪🇸", espn: "soccer/esp.1",          apiFootballId: 140, fdId: "PD",  broadcasts: ["WOWOW", "U-NEXT"] },
+            { id: "seriea",     short: "SERA", name: "Serie A",               country: "Italy",   flag: "🇮🇹", espn: "soccer/ita.1",          apiFootballId: 135, fdId: "SA",  broadcasts: ["DAZN"] },
+            { id: "bundesliga", short: "BUND", name: "Bundesliga",            country: "Germany", flag: "🇩🇪", espn: "soccer/ger.1",          apiFootballId: 78,  fdId: "BL1", broadcasts: ["SPOTV NOW", "スカパー!"] },
+            { id: "ligue1",     short: "L1",   name: "Ligue 1",               country: "France",  flag: "🇫🇷", espn: "soccer/fra.1",          apiFootballId: 61,  fdId: "FL1", broadcasts: ["DAZN", "ABEMA"] },
+            { id: "ucl",        short: "UCL",  name: "UEFA Champions League", country: "Europe",  flag: "🏆", espn: "soccer/uefa.champions", apiFootballId: 2,   fdId: "CL",  broadcasts: ["WOWOW", "U-NEXT"] },
         ];
 
         const WC2026_FEATURED = [
@@ -1190,6 +1298,27 @@
                 })).filter((v) => v.url);
             }
 
+            // Soccer: formations and starting lineups
+            if (sport === "soccer" && Array.isArray(data.rosters)) {
+                const buildSide = (sideKey) => {
+                    const r = data.rosters.find((x) => x.homeAway === sideKey);
+                    if (!r) return null;
+                    const formation = r.formation || null;
+                    const players = (r.roster || []).filter((p) => p.starter !== false).slice(0, 11).map((p) => ({
+                        name: p.athlete?.displayName || p.athlete?.shortName || "—",
+                        position: p.position?.abbreviation || p.position?.displayName || "",
+                        number: p.jersey || "",
+                    }));
+                    return { formation, players };
+                };
+                const home = buildSide("home");
+                const away = buildSide("away");
+                if (home || away) {
+                    out.lineups = { home, away };
+                    out.formations = { home: home?.formation, away: away?.formation };
+                }
+            }
+
             out.venue = data.gameInfo?.venue?.fullName || data.header?.competitions?.[0]?.venue?.fullName || null;
             out.attendance = data.gameInfo?.attendance || null;
             return out;
@@ -1362,12 +1491,13 @@
 
         function GameCard({ game, accent, sport, onClick, isFav, onToggleFav, jpPlayers }) {
             const finished = game.status === "final" || game.status === "live";
+            const isLive = game.status === "live";
             const detail = sport === "baseball" ? game.inning : game.minute;
             const homeWin = finished && game.homeScore > game.awayScore;
             const awayWin = finished && game.awayScore > game.homeScore;
             const hasJp = jpPlayers && jpPlayers.length > 0;
             return (
-                <div className="clickable" onClick={onClick} style={{ background: "#141414", border: hasJp ? "1px solid rgba(229,37,62,0.4)" : "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, padding: "14px 16px", marginBottom: 8, position: "relative" }}>
+                <div className={`clickable ${isLive ? "live-card" : ""}`} onClick={onClick} style={{ background: "#141414", border: hasJp ? "1px solid rgba(229,37,62,0.4)" : "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, padding: "14px 16px", marginBottom: 8, position: "relative", overflow: "hidden" }}>
                     {hasJp && (
                         <div style={{ position: "absolute", top: -1, right: -1, background: "#E5253E", color: "#fff", fontFamily: "'JetBrains Mono', monospace", fontSize: 9, fontWeight: 800, padding: "2px 6px", letterSpacing: 1 }}>
                             🇯🇵 JP
@@ -1536,37 +1666,84 @@
             if (!categories || categories.length === 0) return (
                 <div style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${accent}`, padding: 20, textAlign: "center" }}>
                     <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 18, color: "#fff", letterSpacing: 1, marginBottom: 8 }}>📊 個人成績</div>
-                    <div style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>このリーグの個人成績データはシーズンオフ中、または現在ESPN APIで提供されていません。シーズン中に再度お試しください。</div>
+                    <div style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>このリーグの個人成績データはシーズンオフ中、または現在APIで提供されていません。シーズン中に再度お試しください。</div>
                 </div>
             );
             return (
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    {categories.map((cat, ci) => (
-                        <div key={ci} style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
-                            <div style={{ padding: "10px 14px", borderBottom: "1px solid #1f1f1f", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-                                <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: 1, textTransform: "uppercase" }}>{cat.name}</span>
-                                {cat.abbr && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, letterSpacing: 1 }}>{cat.abbr}</span>}
-                            </div>
-                            {cat.entries.map((e, i) => (
-                                <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr auto", gap: 10, alignItems: "center", padding: "8px 14px", borderBottom: i < cat.entries.length - 1 ? "1px solid #1a1a1a" : "none" }}>
-                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: i === 0 ? accent : "#666", fontWeight: 700 }}>{i + 1}</span>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
-                                        <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#111", border: "1px solid #333", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                            {e.headshot ? <img src={e.headshot} alt={e.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <I.User size={14} color="#666" />}
-                                        </div>
-                                        <div style={{ overflow: "hidden" }}>
-                                            <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: "#eee", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</div>
-                                            {e.team && <div style={{ fontSize: 10, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 4 }}>
-                                                {e.teamLogo && <img src={e.teamLogo} style={{ width: 12, height: 12, objectFit: 'contain' }} />}
-                                                {e.team}
-                                            </div>}
-                                        </div>
-                                    </div>
-                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, color: accent, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{e.value}</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+                    {categories.map((cat, ci) => {
+                        const top3 = cat.entries.slice(0, 3);
+                        const rest = cat.entries.slice(3);
+                        const podiumOrder = top3.length === 3 ? [top3[1], top3[0], top3[2]] : top3;
+                        const podiumRanks = top3.length === 3 ? [2, 1, 3] : top3.map((_, i) => i + 1);
+                        const podiumHeights = top3.length === 3 ? [88, 110, 76] : top3.map(() => 92);
+                        return (
+                            <div key={ci} className="scale-in" style={{ animationDelay: `${ci * 0.1}s` }}>
+                                {/* Category title */}
+                                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: 2, textTransform: "uppercase" }}>{cat.name}</div>
+                                    {cat.abbr && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, letterSpacing: 1, padding: "2px 8px", border: `1px solid ${accent}`, borderRadius: 2, fontWeight: 700 }}>{cat.abbr}</span>}
                                 </div>
-                            ))}
-                        </div>
-                    ))}
+
+                                {/* Podium for top 3 */}
+                                {top3.length > 0 && (
+                                    <div style={{ display: "grid", gridTemplateColumns: top3.length === 3 ? "1fr 1.1fr 1fr" : `repeat(${top3.length}, 1fr)`, gap: 6, marginBottom: rest.length > 0 ? 12 : 0, alignItems: "end" }}>
+                                        {podiumOrder.map((p, i) => {
+                                            const rank = podiumRanks[i];
+                                            const height = podiumHeights[i];
+                                            const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉";
+                                            const cls = rank === 1 ? "podium-1" : rank === 2 ? "podium-2" : "podium-3";
+                                            return (
+                                                <div key={i} className={`${cls} scale-in`} style={{ animationDelay: `${0.1 + i * 0.08}s`, padding: "12px 8px 10px", border: "1px solid", textAlign: "center", minHeight: height, display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", gap: 4, position: "relative", overflow: "hidden" }}>
+                                                    {rank === 1 && (
+                                                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.08) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmerGold 3s linear infinite", pointerEvents: "none" }}></div>
+                                                    )}
+                                                    <div className={rank === 1 ? "float-anim" : ""} style={{ fontSize: rank === 1 ? 26 : 20, lineHeight: 1, marginBottom: 4 }}>{medal}</div>
+                                                    <div style={{ width: rank === 1 ? 44 : 36, height: rank === 1 ? 44 : 36, borderRadius: "50%", background: "#0a0a0a", border: `2px solid ${rank === 1 ? "#FFD700" : rank === 2 ? "#C0C0C0" : "#CD7F32"}`, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                                        {p.headshot ? <img src={p.headshot} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { e.target.style.display = 'none'; }} /> : <I.User size={18} color="#666" />}
+                                                    </div>
+                                                    <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: rank === 1 ? 12 : 11, color: "#fff", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", padding: "0 2px" }}>{p.name}</div>
+                                                    {p.team && (
+                                                        <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 9, color: "#999", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", padding: "0 2px" }}>
+                                                            {p.teamLogo && <img src={p.teamLogo} style={{ width: 10, height: 10, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} />}
+                                                            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{p.team}</span>
+                                                        </div>
+                                                    )}
+                                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: rank === 1 ? 22 : 17, color: rank === 1 ? "#FFD700" : rank === 2 ? "#E0E0E0" : "#CD8050", fontWeight: 800, letterSpacing: 0.5, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{p.value}</div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+
+                                {/* Remaining entries (4-10) as compact list */}
+                                {rest.length > 0 && (
+                                    <div className="stagger" style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                                        {rest.map((e, i) => (
+                                            <div key={i} style={{ display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 10, alignItems: "center", padding: "10px 14px", borderBottom: i < rest.length - 1 ? "1px solid #1a1a1a" : "none" }}>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#555", fontWeight: 700, textAlign: "center" }}>{i + 4}</span>
+                                                <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
+                                                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#0a0a0a", border: "1px solid #2a2a2a", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                                        {e.headshot ? <img src={e.headshot} alt={e.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(ev) => { ev.target.style.display = 'none'; }} /> : <I.User size={13} color="#555" />}
+                                                    </div>
+                                                    <div style={{ overflow: "hidden", minWidth: 0 }}>
+                                                        <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: "#eee", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</div>
+                                                        {e.team && (
+                                                            <div style={{ fontSize: 10, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 4 }}>
+                                                                {e.teamLogo && <img src={e.teamLogo} style={{ width: 11, height: 11, objectFit: 'contain' }} onError={(ev) => { ev.target.style.display = 'none'; }} />}
+                                                                <span>{e.team}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 15, color: accent, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{e.value}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             );
         }
@@ -1726,6 +1903,16 @@
                                                 得点シーン
                                             </div>
                                             <SoccerGoalsList scoringPlays={detail.scoringPlays} accent={league.accent} game={game} />
+                                        </div>
+                                    )}
+
+                                    {/* Soccer: starting lineups */}
+                                    {sport === "soccer" && detail.lineups && (
+                                        <div style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                スタメン
+                                            </div>
+                                            <SoccerLineups lineups={detail.lineups} formations={detail.formations} accent={league.accent} game={game} />
                                         </div>
                                     )}
 
@@ -1921,6 +2108,36 @@
                             </div>
                         );
                     })}
+                </div>
+            );
+        }
+
+        function SoccerLineups({ lineups, formations, accent, game }) {
+            if (!lineups) return null;
+            const renderSide = (side, sideName, isHome) => {
+                if (!side || !side.players || side.players.length === 0) return null;
+                return (
+                    <div style={{ background: "#141414", border: "1px solid #1f1f1f", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, paddingBottom: 8, borderBottom: "1px solid #1f1f1f" }}>
+                            <span style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 13, color: "#fff", letterSpacing: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sideName}</span>
+                            {side.formation && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: accent, fontWeight: 700, padding: "2px 6px", border: `1px solid ${accent}`, letterSpacing: 1, flexShrink: 0 }}>{side.formation}</span>}
+                        </div>
+                        <div className="stagger" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                            {side.players.map((p, i) => (
+                                <div key={i} style={{ display: "grid", gridTemplateColumns: "26px 1fr 28px", gap: 8, alignItems: "center", padding: "4px 0" }}>
+                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#666", fontWeight: 700, textAlign: "center", fontVariantNumeric: "tabular-nums" }}>{p.number || "—"}</span>
+                                    <span style={{ fontSize: 12, color: "#ddd", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, fontWeight: 700, letterSpacing: 0.5, textAlign: "right" }}>{p.position || ""}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            };
+            return (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    {renderSide(lineups.away, game.awayShort || "AWAY", false)}
+                    {renderSide(lineups.home, game.homeShort || "HOME", true)}
                 </div>
             );
         }
@@ -2604,7 +2821,8 @@
                                 {league.subLeagues.map((sl) => {
                                     const active = sl.id === subId;
                                     return (
-                                        <button key={sl.id} onClick={() => setSubId(sl.id)} style={{ background: active ? league.accent : "transparent", color: active ? "#0a0a0a" : "#888", border: `1px solid ${active ? league.accent : "#222"}`, padding: "5px 10px", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: 0.5, whiteSpace: "nowrap", transition: "all 0.2s" }}>
+                                        <button key={sl.id} onClick={() => setSubId(sl.id)} className="clickable" style={{ background: active ? league.accent : "transparent", color: active ? "#0a0a0a" : "#888", border: `1px solid ${active ? league.accent : "#222"}`, padding: "5px 10px", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, letterSpacing: 0.5, whiteSpace: "nowrap", transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.25, 1)", display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer", transform: active ? "scale(1.05)" : "scale(1)" }}>
+                                            {sl.flag && <span style={{ fontSize: 12 }}>{sl.flag}</span>}
                                             {sl.short}
                                         </button>
                                     );
@@ -2730,18 +2948,22 @@
                                         return 0;
                                     });
                                     if (sorted.length === 0) return <div style={{ textAlign: "center", padding: 40, color: "#555" }}>{searchQuery || jpFilter ? "条件に合う試合が見つかりません" : "No games today."}</div>;
-                                    return sorted.map((g) => (
-                                        <GameCard
-                                            key={g.id}
-                                            game={g}
-                                            accent={league.accent}
-                                            sport={effective.sport}
-                                            onClick={() => setSelectedGame(g)}
-                                            isFav={isFavTeam}
-                                            onToggleFav={toggleFavTeam}
-                                            jpPlayers={getJpPlayers(g.home, g.away)}
-                                        />
-                                    ));
+                                    return (
+                                        <div className="stagger" key={`scores-${cacheKey}`}>
+                                            {sorted.map((g) => (
+                                                <GameCard
+                                                    key={g.id}
+                                                    game={g}
+                                                    accent={league.accent}
+                                                    sport={effective.sport}
+                                                    onClick={() => setSelectedGame(g)}
+                                                    isFav={isFavTeam}
+                                                    onToggleFav={toggleFavTeam}
+                                                    jpPlayers={getJpPlayers(g.home, g.away)}
+                                                />
+                                            ))}
+                                        </div>
+                                    );
                                 })()}
 
                                 {!current.npbFallback && view === "standings" && <StandingsTable groups={current.groups} accent={league.accent} sport={effective.sport} />}

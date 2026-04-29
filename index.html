@@ -485,6 +485,47 @@
         const API_FOOTBALL_TOKEN = "bd29124228700083eb2ff1d98466daa6";
 
         // -----------------------------
+        // BALLDONTLIE API token (get yours from https://www.balldontlie.io)
+        // Free tier: 60 requests/minute, NBA leaders, stats, games
+        // 自分のトークンに書き換えてください ↓
+        // -----------------------------
+        const BALLDONTLIE_TOKEN = "d27a85ee-083d-4f9e-8a67-44f21032ef4b";
+
+        // NBA team ID → name map (used by balldontlie leaders parsing)
+        window.__BALLDONTLIE_TEAMS = {
+            1: { abbreviation: "ATL", full_name: "Atlanta Hawks" },
+            2: { abbreviation: "BOS", full_name: "Boston Celtics" },
+            3: { abbreviation: "BKN", full_name: "Brooklyn Nets" },
+            4: { abbreviation: "CHA", full_name: "Charlotte Hornets" },
+            5: { abbreviation: "CHI", full_name: "Chicago Bulls" },
+            6: { abbreviation: "CLE", full_name: "Cleveland Cavaliers" },
+            7: { abbreviation: "DAL", full_name: "Dallas Mavericks" },
+            8: { abbreviation: "DEN", full_name: "Denver Nuggets" },
+            9: { abbreviation: "DET", full_name: "Detroit Pistons" },
+            10: { abbreviation: "GSW", full_name: "Golden State Warriors" },
+            11: { abbreviation: "HOU", full_name: "Houston Rockets" },
+            12: { abbreviation: "IND", full_name: "Indiana Pacers" },
+            13: { abbreviation: "LAC", full_name: "LA Clippers" },
+            14: { abbreviation: "LAL", full_name: "Los Angeles Lakers" },
+            15: { abbreviation: "MEM", full_name: "Memphis Grizzlies" },
+            16: { abbreviation: "MIA", full_name: "Miami Heat" },
+            17: { abbreviation: "MIL", full_name: "Milwaukee Bucks" },
+            18: { abbreviation: "MIN", full_name: "Minnesota Timberwolves" },
+            19: { abbreviation: "NOP", full_name: "New Orleans Pelicans" },
+            20: { abbreviation: "NYK", full_name: "New York Knicks" },
+            21: { abbreviation: "OKC", full_name: "Oklahoma City Thunder" },
+            22: { abbreviation: "ORL", full_name: "Orlando Magic" },
+            23: { abbreviation: "PHI", full_name: "Philadelphia 76ers" },
+            24: { abbreviation: "PHX", full_name: "Phoenix Suns" },
+            25: { abbreviation: "POR", full_name: "Portland Trail Blazers" },
+            26: { abbreviation: "SAC", full_name: "Sacramento Kings" },
+            27: { abbreviation: "SAS", full_name: "San Antonio Spurs" },
+            28: { abbreviation: "TOR", full_name: "Toronto Raptors" },
+            29: { abbreviation: "UTA", full_name: "Utah Jazz" },
+            30: { abbreviation: "WAS", full_name: "Washington Wizards" },
+        };
+
+        // -----------------------------
         // League configs
         // -----------------------------
         const SOCCER_LEAGUES = [
@@ -722,20 +763,47 @@
         // Fetch wrappers
         // -----------------------------
         async function fetchScoreboard(espnPath, view, offset = 0) {
-            let range = null;
-            const targetDate = new Date();
+            // ESPN API uses ET-based dates. To show JST "today" correctly, we fetch
+            // a wider window (UTC -1 to +1 day) and let the caller filter by JST date.
+            const targetJst = new Date();
+            targetJst.setDate(targetJst.getDate() + offset);
+            // For scores: target day in JST. For schedule: tomorrow ~ +7 days in JST.
+            let from, to;
             if (view === "scores") {
-                targetDate.setDate(targetDate.getDate() + offset);
-                range = ymd(targetDate);
+                from = new Date(targetJst); from.setDate(from.getDate() - 1);
+                to = new Date(targetJst); to.setDate(to.getDate() + 1);
             } else if (view === "schedule") {
-                const tom = new Date(targetDate); tom.setDate(tom.getDate() + 1);
-                const fut = new Date(targetDate); fut.setDate(fut.getDate() + 7);
-                range = `${ymd(tom)}-${ymd(fut)}`;
+                from = new Date(targetJst);  // start tomorrow but include today (UTC) margin
+                to = new Date(targetJst); to.setDate(to.getDate() + 8);
+            } else {
+                from = null; to = null;
             }
-            const url = `https://site.api.espn.com/apis/site/v2/sports/${espnPath}/scoreboard${range ? `?dates=${range}&limit=50` : ""}`;
+            let range = null;
+            if (from && to) range = `${ymd(from)}-${ymd(to)}`;
+            const url = `https://site.api.espn.com/apis/site/v2/sports/${espnPath}/scoreboard${range ? `?dates=${range}&limit=100` : ""}`;
             const res = await fetch(url);
             if (!res.ok) throw new Error(`ESPN ${res.status}`);
-            return res.json();
+            const json = await res.json();
+            // Attach the JST target date so caller can filter
+            json._targetJstDate = targetJst;
+            json._view = view;
+            return json;
+        }
+        // Returns true if `eventDate` (UTC ISO) falls on `targetJst` (JST calendar day)
+        function isOnJstDate(eventIsoDate, targetJst) {
+            const evt = new Date(eventIsoDate);
+            // Convert event to JST calendar day
+            const evtJst = new Date(evt.getTime() + 9 * 3600 * 1000);
+            const t = targetJst;
+            return evtJst.getUTCFullYear() === t.getFullYear()
+                && evtJst.getUTCMonth() === t.getMonth()
+                && evtJst.getUTCDate() === t.getDate();
+        }
+        function isAfterJst(eventIsoDate, targetJst) {
+            const evt = new Date(eventIsoDate);
+            // Get JST midnight of targetJst
+            const tJstMidnight = new Date(Date.UTC(targetJst.getFullYear(), targetJst.getMonth(), targetJst.getDate()) - 9 * 3600 * 1000);
+            return evt >= tJstMidnight;
         }
         async function fetchStandings(espnPath) {
             const url = `https://site.api.espn.com/apis/v2/sports/${espnPath}/standings?level=3`;
@@ -748,15 +816,26 @@
             if (espnPath === "baseball/mlb") {
                 const season = new Date().getFullYear();
                 const categories = [
-                    { key: "homeRuns",         label: "本塁打 (HR)",   group: "hitting",  abbr: "HR" },
-                    { key: "battingAverage",   label: "打率 (AVG)",    group: "hitting",  abbr: "AVG" },
-                    { key: "runsBattedIn",     label: "打点 (RBI)",    group: "hitting",  abbr: "RBI" },
-                    { key: "hits",             label: "安打 (H)",      group: "hitting",  abbr: "H" },
-                    { key: "stolenBases",      label: "盗塁 (SB)",     group: "hitting",  abbr: "SB" },
-                    { key: "wins",             label: "勝利 (W)",      group: "pitching", abbr: "W" },
-                    { key: "earnedRunAverage", label: "防御率 (ERA)",  group: "pitching", abbr: "ERA" },
-                    { key: "strikeouts",       label: "奪三振 (K)",    group: "pitching", abbr: "K" },
-                    { key: "saves",            label: "セーブ (SV)",   group: "pitching", abbr: "SV" },
+                    // Hitting
+                    { key: "homeRuns",            label: "本塁打 (HR)",          group: "hitting",  abbr: "HR" },
+                    { key: "battingAverage",      label: "打率 (AVG)",           group: "hitting",  abbr: "AVG" },
+                    { key: "onBasePlusSlugging",  label: "OPS",                  group: "hitting",  abbr: "OPS" },
+                    { key: "sluggingPercentage",  label: "長打率 (SLG)",         group: "hitting",  abbr: "SLG" },
+                    { key: "onBasePercentage",    label: "出塁率 (OBP)",         group: "hitting",  abbr: "OBP" },
+                    { key: "runsBattedIn",        label: "打点 (RBI)",           group: "hitting",  abbr: "RBI" },
+                    { key: "hits",                label: "安打 (H)",             group: "hitting",  abbr: "H" },
+                    { key: "doubles",             label: "二塁打 (2B)",          group: "hitting",  abbr: "2B" },
+                    { key: "triples",             label: "三塁打 (3B)",          group: "hitting",  abbr: "3B" },
+                    { key: "stolenBases",         label: "盗塁 (SB)",            group: "hitting",  abbr: "SB" },
+                    { key: "runs",                label: "得点 (R)",             group: "hitting",  abbr: "R" },
+                    { key: "walks",               label: "四球 (BB)",            group: "hitting",  abbr: "BB" },
+                    // Pitching
+                    { key: "wins",                label: "勝利 (W)",             group: "pitching", abbr: "W" },
+                    { key: "earnedRunAverage",    label: "防御率 (ERA)",         group: "pitching", abbr: "ERA" },
+                    { key: "walksAndHitsPerInningPitched", label: "WHIP",        group: "pitching", abbr: "WHIP" },
+                    { key: "strikeouts",          label: "奪三振 (K)",           group: "pitching", abbr: "K" },
+                    { key: "saves",               label: "セーブ (SV)",          group: "pitching", abbr: "SV" },
+                    { key: "inningsPitched",      label: "投球回 (IP)",          group: "pitching", abbr: "IP" },
                 ];
                 const results = await Promise.allSettled(categories.map(async (c) => {
                     const url = `https://statsapi.mlb.com/api/v1/stats/leaders?leaderCategories=${c.key}&season=${season}&limit=5&statGroup=${c.group}&sportId=1`;
@@ -770,11 +849,38 @@
                 return { mlbStats: true, items: ok };
             }
 
+            // NBA: use balldontlie.io API (CORS-enabled, free with API key)
+            if (espnPath === "basketball/nba" && BALLDONTLIE_TOKEN && BALLDONTLIE_TOKEN !== "YOUR_TOKEN_HERE") {
+                try {
+                    const now = new Date();
+                    // NBA season Oct-Apr. Current season year = year that started.
+                    const month = now.getMonth(); // 0-11
+                    const seasonYear = month >= 9 ? now.getFullYear() : now.getFullYear() - 1;
+
+                    const stats = [
+                        { key: "pts", label: "得点王 (PTS)",       abbr: "PTS" },
+                        { key: "reb", label: "リバウンド王 (REB)", abbr: "REB" },
+                        { key: "ast", label: "アシスト王 (AST)",   abbr: "AST" },
+                        { key: "stl", label: "スティール王 (STL)", abbr: "STL" },
+                        { key: "blk", label: "ブロック王 (BLK)",   abbr: "BLK" },
+                    ];
+                    const headers = { "Authorization": BALLDONTLIE_TOKEN };
+                    const results = await Promise.allSettled(stats.map(async (s) => {
+                        const url = `https://api.balldontlie.io/nba/v1/leaders?stat_type=${s.key}&season=${seasonYear}`;
+                        const res = await fetch(url, { headers });
+                        if (!res.ok) throw new Error(`balldontlie ${res.status}`);
+                        const json = await res.json();
+                        return { meta: s, data: json };
+                    }));
+                    const ok = results.filter(r => r.status === "fulfilled").map(r => r.value);
+                    if (ok.length > 0) return { balldontlie: true, items: ok };
+                } catch { /* fall through */ }
+            }
+
             // Soccer leagues with football-data.org token configured
             if (fdId && FOOTBALL_DATA_TOKEN && FOOTBALL_DATA_TOKEN !== "YOUR_TOKEN_HERE") {
                 try {
-                    // 修正後
-                    const url = `https://cors-anywhere.herokuapp.com/https://api.football-data.org/v4/competitions/${leagueId}/scorers`;        
+                    const url = `https://api.football-data.org/v4/competitions/${fdId}/scorers?limit=10`;
                     const res = await fetch(url, { headers: { "X-Auth-Token": FOOTBALL_DATA_TOKEN } });
                     if (res.ok) {
                         const json = await res.json();
@@ -786,11 +892,9 @@
             // J.League / other soccer leagues with API-Football token configured
             if (apiFbId && API_FOOTBALL_TOKEN && API_FOOTBALL_TOKEN !== "YOUR_TOKEN_HERE") {
                 try {
-                    // J.League season is calendar year (Feb-Dec). Use current year, fallback to previous.
                     const now = new Date();
                     const seasons = [now.getFullYear(), now.getFullYear() - 1];
                     for (const season of seasons) {
-                        // API-Football: topscorers (goals), topassists, topyellowcards, topredcards
                         const baseUrl = "https://v3.football.api-sports.io";
                         const headers = { "x-apisports-key": API_FOOTBALL_TOKEN };
                         const [scorersRes, assistsRes] = await Promise.allSettled([
@@ -804,7 +908,6 @@
                         if (assistsRes.status === "fulfilled" && assistsRes.value.ok) {
                             assistsData = await assistsRes.value.json();
                         }
-                        // Check if we got actual data
                         if (scorersData?.response?.length > 0 || assistsData?.response?.length > 0) {
                             return { apiFootballScorers: true, scorers: scorersData?.response || [], assists: assistsData?.response || [], season };
                         }
@@ -812,8 +915,7 @@
                 } catch (e) { /* fall through */ }
             }
 
-            // NBA, Soccer leagues, etc.: ESPN's leaders endpoints don't have CORS headers
-            // and most return 404. Return a special marker for the UI to show external links.
+            // Fallback: external links
             const externalUrls = {
                 "basketball/nba": "https://www.espn.com/nba/statistics",
                 "soccer/eng.1":   "https://www.espn.com/soccer/stats/_/league/ENG.1",
@@ -867,6 +969,73 @@
             return res.json();
         }
 
+        // TheSportsDB - free public API (test key "123"), CORS-enabled
+        // Used to enrich EPL match details with highlight videos & richer data
+        const TSDB_BASE = "https://www.thesportsdb.com/api/v1/json/123";
+        const TSDB_LEAGUE_IDS = {
+            "soccer/eng.1": "4328", // English Premier League
+            "soccer/esp.1": "4335", // La Liga
+            "soccer/ita.1": "4332", // Serie A
+            "soccer/ger.1": "4331", // Bundesliga
+            "soccer/fra.1": "4334", // Ligue 1
+            "soccer/uefa.champions": "4480", // UEFA Champions League
+        };
+        async function fetchTsdbEvent(homeTeam, awayTeam, dateStr) {
+            // Search for event by date and team using TheSportsDB
+            // dateStr = YYYY-MM-DD
+            try {
+                const url = `${TSDB_BASE}/eventsday.php?d=${dateStr}&s=Soccer`;
+                const res = await fetch(url);
+                if (!res.ok) return null;
+                const json = await res.json();
+                const events = json.events || [];
+                if (events.length === 0) return null;
+                // Match by team names (case-insensitive partial)
+                const norm = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+                const h = norm(homeTeam);
+                const a = norm(awayTeam);
+                return events.find((e) => {
+                    const eh = norm(e.strHomeTeam);
+                    const ea = norm(e.strAwayTeam);
+                    return (eh.includes(h) || h.includes(eh)) && (ea.includes(a) || a.includes(ea));
+                }) || null;
+            } catch { return null; }
+        }
+        async function fetchTsdbHighlights(homeTeam, awayTeam, isoDate) {
+            const d = new Date(isoDate);
+            const dateStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+            const evt = await fetchTsdbEvent(homeTeam, awayTeam, dateStr);
+            if (!evt) {
+                // Try previous day too (timezone edge cases)
+                const dPrev = new Date(d.getTime() - 86400000);
+                const prevStr = `${dPrev.getFullYear()}-${pad(dPrev.getMonth()+1)}-${pad(dPrev.getDate())}`;
+                const evt2 = await fetchTsdbEvent(homeTeam, awayTeam, prevStr);
+                if (!evt2) return null;
+                return parseTsdbEvent(evt2);
+            }
+            return parseTsdbEvent(evt);
+        }
+        function youtubeId(url) {
+            if (!url) return null;
+            const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})/);
+            return m ? m[1] : null;
+        }
+        function parseTsdbEvent(evt) {
+            if (!evt) return null;
+            return {
+                videoUrl: evt.strVideo || null,
+                thumb: evt.strThumb || null,
+                tvStation: evt.strTvStation || null,
+                round: evt.intRound || null,
+                stadium: evt.strVenue || null,
+                attendance: evt.intSpectators || null,
+                manOfTheMatch: evt.strHomeManOfTheMatch || evt.strAwayManOfTheMatch || null,
+                description: evt.strDescriptionEN || null,
+                homeBadge: evt.strHomeTeamBadge || null,
+                awayBadge: evt.strAwayTeamBadge || null,
+            };
+        }
+
         // -----------------------------
         // Parse helpers
         // -----------------------------
@@ -903,6 +1072,7 @@
                 time: timeLabel,
                 venue: comp.venue?.fullName || null,
                 broadcast: broadcasts ? broadcasts.join(" / ") : null,
+                _sortDate: new Date(event.date).getTime(),
             };
         }
 
@@ -945,6 +1115,31 @@
 
         function parseLeaders(data, sport) {
             if (!data) return [];
+
+            // balldontlie NBA leaders
+            if (data.balldontlie && Array.isArray(data.items)) {
+                const result = [];
+                // Need team names: balldontlie returns team_id but we need full team objects.
+                // Pre-fetched? No. We'll show abbreviation and city through what's there if any.
+                for (const item of data.items) {
+                    const list = item.data?.data || [];
+                    if (list.length === 0) continue;
+                    const entries = list.slice(0, 10).map((l) => {
+                        const p = l.player || {};
+                        // BALLDONTLIE_TEAMS map (set up below) provides team logos and names
+                        const team = window.__BALLDONTLIE_TEAMS?.[p.team_id] || {};
+                        return {
+                            name: `${p.first_name || ""} ${p.last_name || ""}`.trim() || "—",
+                            headshot: null,
+                            team: team.full_name || team.abbreviation || "",
+                            teamLogo: null,
+                            value: typeof l.value === "number" ? l.value.toFixed(1) : String(l.value ?? "—"),
+                        };
+                    });
+                    result.push({ name: item.meta.label, abbr: item.meta.abbr, entries });
+                }
+                return result;
+            }
 
             // API-Football top scorers (J.League etc.)
             if (data.apiFootballScorers) {
@@ -1434,15 +1629,21 @@
         }
 
         function PitchLineup({ lineup, accent }) {
+            // Accept both: array of players OR { formation, players } object
+            const players = Array.isArray(lineup) ? lineup : (lineup?.players || []);
+            if (!Array.isArray(players) || players.length === 0) {
+                return <div style={{ padding: 16, textAlign: "center", color: "#666", fontSize: 11 }}>スタメン情報なし</div>;
+            }
             const groups = { GK: [], DF: [], MF: [], FW: [] };
-            lineup.forEach(p => {
-                const pos = p.position.toUpperCase();
-                if (pos.includes('G')) groups.GK.push(p);
+            players.forEach(p => {
+                const pos = (p.position || "").toUpperCase();
+                if (!pos) groups.MF.push(p);
+                else if (pos.includes('G')) groups.GK.push(p);
                 else if (pos.includes('D') || pos === 'CB' || pos === 'RB' || pos === 'LB' || pos === 'RWB' || pos === 'LWB') groups.DF.push(p);
                 else if (pos.includes('M') || pos === 'CM' || pos === 'CDM' || pos === 'CAM' || pos === 'RM' || pos === 'LM') groups.MF.push(p);
                 else groups.FW.push(p);
             });
-            if (groups.GK.length === 0 && lineup.length > 0) groups.GK.push(lineup[0]);
+            if (groups.GK.length === 0 && players.length > 0) groups.GK.push(players[0]);
 
             return (
                 <div className="soccer-pitch pitch-lines">
@@ -1752,14 +1953,12 @@
             const [detail, setDetail] = useState(null);
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
+            const [tsdbExtra, setTsdbExtra] = useState(null);
 
             useEffect(() => {
                 let mounted = true;
                 const load = async () => {
                     try {
-                        // Always try ESPN API first since the game.id we have is from ESPN scoreboard.
-                        // MLB Stats API uses a different ID system (gamePk), so fetchMlbDetail with
-                        // an ESPN ID would fail.
                         const raw = await fetchSummary(espnPath, game.id);
                         if (!mounted) return;
                         setDetail(parseSummary(raw, sport));
@@ -1770,8 +1969,24 @@
                     }
                 };
                 load();
+                // Parallel: fetch TSDB extras for soccer leagues (highlights, TV, etc.)
+                if (sport === "soccer" && TSDB_LEAGUE_IDS[espnPath]) {
+                    // Reconstruct ISO date from game.date (MM/DD) using current/last year context
+                    const now = new Date();
+                    const [mm, dd] = (game.date || "").split("/").map(Number);
+                    if (mm && dd) {
+                        let year = now.getFullYear();
+                        // If date is in the future > 6 months ahead, it's likely from previous year (rare)
+                        const candidate = new Date(year, mm - 1, dd);
+                        if (candidate.getTime() - now.getTime() > 180 * 86400000) year -= 1;
+                        const iso = new Date(year, mm - 1, dd).toISOString();
+                        fetchTsdbHighlights(game.home, game.away, iso).then((extra) => {
+                            if (mounted && extra) setTsdbExtra(extra);
+                        }).catch(() => {});
+                    }
+                }
                 return () => { mounted = false; };
-            }, [espnPath, game.id, sport, isMlbOfficial]);
+            }, [espnPath, game.id, sport, isMlbOfficial, game.home, game.away, game.date]);
 
             const finished = game.status === "final" || game.status === "live";
             const detailLabel = sport === "baseball" ? game.inning : game.minute;
@@ -1817,6 +2032,79 @@
 
                             {detail && !loading && (
                                 <>
+                                    {/* TheSportsDB extras: highlights, TV, MotM (soccer only) */}
+                                    {tsdbExtra && (tsdbExtra.videoUrl || tsdbExtra.tvStation || tsdbExtra.manOfTheMatch || tsdbExtra.thumb) && (
+                                        <div className="scale-in" style={{ marginBottom: 20 }}>
+                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
+                                                🎬 ハイライト & エクストラ
+                                            </div>
+                                            <div style={{ background: "#141414", border: "1px solid #1f1f1f", borderLeft: `3px solid ${league.accent}`, padding: 14, display: "flex", flexDirection: "column", gap: 12 }}>
+                                                {tsdbExtra.videoUrl && (() => {
+                                                    const vid = youtubeId(tsdbExtra.videoUrl);
+                                                    if (vid) {
+                                                        return (
+                                                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                                                <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", background: "#000", border: "1px solid #2a2a2a" }}>
+                                                                    <iframe
+                                                                        src={`https://www.youtube.com/embed/${vid}`}
+                                                                        title="Match Highlights"
+                                                                        loading="lazy"
+                                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                                        allowFullScreen
+                                                                        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
+                                                                    />
+                                                                </div>
+                                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                                    <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, fontWeight: 700 }}>▶ HIGHLIGHTS · YOUTUBE</span>
+                                                                    <a href={tsdbExtra.videoUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: league.accent, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                                                                        OPEN <I.Ext size={11} />
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return (
+                                                        <a href={tsdbExtra.videoUrl} target="_blank" rel="noopener noreferrer" className="clickable" style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", background: "linear-gradient(135deg, rgba(255,0,0,0.12), rgba(255,77,46,0.04))", border: "1px solid rgba(255,77,46,0.4)", textDecoration: "none", color: "inherit", borderRadius: 2 }}>
+                                                            <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#ff0000", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>▶</div>
+                                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                                <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: "#fff", letterSpacing: 1, lineHeight: 1.1 }}>ハイライト動画を見る</div>
+                                                                <div style={{ fontSize: 10, color: "#888", marginTop: 2, fontFamily: "'JetBrains Mono', monospace" }}>外部サイト · 新しいタブで開きます</div>
+                                                            </div>
+                                                            <I.Ext size={14} color="#888" />
+                                                        </a>
+                                                    );
+                                                })()}
+                                                {tsdbExtra.manOfTheMatch && (
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                                        <span style={{ fontSize: 18 }}>⭐</span>
+                                                        <div>
+                                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, fontWeight: 700 }}>MAN OF THE MATCH</div>
+                                                            <div style={{ fontSize: 13, color: "#fff", fontWeight: 700, marginTop: 2 }}>{tsdbExtra.manOfTheMatch}</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {tsdbExtra.tvStation && (
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                                        <I.Tv size={14} />
+                                                        <div>
+                                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, fontWeight: 700 }}>TV BROADCAST</div>
+                                                            <div style={{ fontSize: 12, color: "#ddd", marginTop: 2 }}>{tsdbExtra.tvStation}</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {tsdbExtra.attendance && tsdbExtra.attendance !== "0" && (
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                                        <span style={{ fontSize: 14 }}>👥</span>
+                                                        <div>
+                                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#666", letterSpacing: 1, fontWeight: 700 }}>ATTENDANCE</div>
+                                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#ddd", fontWeight: 700, marginTop: 2 }}>{Number(tsdbExtra.attendance).toLocaleString()} 人</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Lineups / Rosters Block */}
                                     {detail.lineups && (
                                         <div style={{ marginBottom: 20 }}>
@@ -1841,38 +2129,46 @@
                                                         <PitchLineup lineup={detail.lineups.away} accent={league.accent} />
                                                     </div>
                                                 </div>
-                                            ) : (
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                                    <div>
-                                                        <div style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
-                                                            <span>{game.awayShort}</span>
+                                            ) : (() => {
+                                                // Baseball / other: accept both array OR { players } object
+                                                const awayArr = Array.isArray(detail.lineups.away) ? detail.lineups.away : (detail.lineups.away?.players || []);
+                                                const homeArr = Array.isArray(detail.lineups.home) ? detail.lineups.home : (detail.lineups.home?.players || []);
+                                                if (awayArr.length === 0 && homeArr.length === 0) {
+                                                    return <div style={{ padding: 16, textAlign: "center", color: "#666", fontSize: 11 }}>スタメン情報なし</div>;
+                                                }
+                                                return (
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                                        <div>
+                                                            <div style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
+                                                                <span>{game.awayShort}</span>
+                                                            </div>
+                                                            <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                                                                {awayArr.map((p, i) => (
+                                                                    <div key={i} style={{ display: 'flex', alignItems: 'center', fontSize: 11, padding: '6px 8px', borderBottom: i < awayArr.length - 1 ? '1px solid #1f1f1f' : 'none' }}>
+                                                                        <span style={{ color: '#666', fontFamily: "'JetBrains Mono', monospace", width: 14 }}>{i+1}</span>
+                                                                        <span style={{ color: league.accent, fontFamily: "'JetBrains Mono', monospace", width: 20, fontSize: 9 }}>{p.position || ""}</span>
+                                                                        <span style={{ color: '#ddd', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
                                                         </div>
-                                                        <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
-                                                            {detail.lineups.away.map((p, i) => (
-                                                                <div key={i} style={{ display: 'flex', alignItems: 'center', fontSize: 11, padding: '6px 8px', borderBottom: i < detail.lineups.away.length - 1 ? '1px solid #1f1f1f' : 'none' }}>
-                                                                    <span style={{ color: '#666', fontFamily: "'JetBrains Mono', monospace", width: 14 }}>{i+1}</span>
-                                                                    <span style={{ color: league.accent, fontFamily: "'JetBrains Mono', monospace", width: 20, fontSize: 9 }}>{p.position}</span>
-                                                                    <span style={{ color: '#ddd', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
-                                                                </div>
-                                                            ))}
+                                                        <div>
+                                                            <div style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
+                                                                <span>{game.homeShort}</span>
+                                                            </div>
+                                                            <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                                                                {homeArr.map((p, i) => (
+                                                                    <div key={i} style={{ display: 'flex', alignItems: 'center', fontSize: 11, padding: '6px 8px', borderBottom: i < homeArr.length - 1 ? '1px solid #1f1f1f' : 'none' }}>
+                                                                        <span style={{ color: '#666', fontFamily: "'JetBrains Mono', monospace", width: 14 }}>{i+1}</span>
+                                                                        <span style={{ color: league.accent, fontFamily: "'JetBrains Mono', monospace", width: 20, fontSize: 9 }}>{p.position || ""}</span>
+                                                                        <span style={{ color: '#ddd', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div>
-                                                        <div style={{ fontSize: 11, color: '#aaa', marginBottom: 6, fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
-                                                            <span>{game.homeShort}</span>
-                                                        </div>
-                                                        <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
-                                                            {detail.lineups.home.map((p, i) => (
-                                                                <div key={i} style={{ display: 'flex', alignItems: 'center', fontSize: 11, padding: '6px 8px', borderBottom: i < detail.lineups.home.length - 1 ? '1px solid #1f1f1f' : 'none' }}>
-                                                                    <span style={{ color: '#666', fontFamily: "'JetBrains Mono', monospace", width: 14 }}>{i+1}</span>
-                                                                    <span style={{ color: league.accent, fontFamily: "'JetBrains Mono', monospace", width: 20, fontSize: 9 }}>{p.position}</span>
-                                                                    <span style={{ color: '#ddd', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.name}</span>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
+                                                );
+                                            })()}
                                         </div>
                                     )}
 
@@ -1906,17 +2202,6 @@
                                         </div>
                                     )}
 
-                                    {/* Soccer: starting lineups */}
-                                    {sport === "soccer" && detail.lineups && (
-                                        <div style={{ marginBottom: 20 }}>
-                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>
-                                                スタメン
-                                            </div>
-                                            <SoccerLineups lineups={detail.lineups} formations={detail.formations} accent={league.accent} game={game} />
-                                        </div>
-                                    )}
-
-                                    {/* Baseball: Inning-by-inning linescore (1-9 + R H E) */}
                                     {/* Baseball: Inning-by-inning linescore (1-9 + R H E) */}
                                     {sport === "baseball" && (
                                         <div style={{ marginBottom: 20 }}>
@@ -2328,25 +2613,41 @@
                     </div>
                 );
             }
-            // leaders
+            // leaders - podium style skeleton
             return (
                 <div>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 16, color: accent }}>
                         <span className="loading-dots"><span style={{ background: accent }}></span><span style={{ background: accent }}></span><span style={{ background: accent }}></span></span>
                         <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: 2, color: "#888" }}>LOADING LEADERS</span>
                     </div>
-                    {Array.from({ length: 3 }).map((_, ci) => (
-                        <div key={ci} style={{ background: "#141414", border: "1px solid #1f1f1f", marginBottom: 16 }}>
-                            <div style={{ padding: "10px 14px", borderBottom: "1px solid #1f1f1f" }}>
-                                <div className="skeleton" style={{ height: 16, width: 140 }} />
+                    {Array.from({ length: 2 }).map((_, ci) => (
+                        <div key={ci} style={{ marginBottom: 24 }}>
+                            <div className="skeleton" style={{ height: 16, width: 160, marginBottom: 12 }} />
+                            {/* Podium */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr 1fr", gap: 6, marginBottom: 12, alignItems: "end" }}>
+                                {[88, 110, 76].map((h, i) => (
+                                    <div key={i} style={{ background: "#141414", border: "1px solid #1f1f1f", padding: "12px 8px 10px", textAlign: "center", minHeight: h, display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", gap: 6 }}>
+                                        <div className="skeleton" style={{ width: 18, height: 18, borderRadius: "50%" }} />
+                                        <div className="skeleton" style={{ width: i === 1 ? 44 : 36, height: i === 1 ? 44 : 36, borderRadius: "50%" }} />
+                                        <div className="skeleton" style={{ width: "70%", height: 11 }} />
+                                        <div className="skeleton" style={{ width: "50%", height: 9 }} />
+                                        <div className="skeleton" style={{ width: 32, height: i === 1 ? 22 : 17 }} />
+                                    </div>
+                                ))}
                             </div>
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <div key={i} style={{ display: "grid", gridTemplateColumns: "20px 1fr 60px", gap: 10, padding: "10px 14px", borderBottom: i < 4 ? "1px solid #1a1a1a" : "none", alignItems: "center" }}>
-                                    <div className="skeleton" style={{ height: 12, width: 14 }} />
-                                    <div className="skeleton" style={{ height: 13, width: `${50 + i * 8}%` }} />
-                                    <div className="skeleton" style={{ height: 14, width: 40 }} />
-                                </div>
-                            ))}
+                            {/* List */}
+                            <div style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                    <div key={i} style={{ display: "grid", gridTemplateColumns: "28px 1fr 50px", gap: 10, padding: "10px 14px", borderBottom: i < 3 ? "1px solid #1a1a1a" : "none", alignItems: "center" }}>
+                                        <div className="skeleton" style={{ height: 12, width: 14 }} />
+                                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                            <div className="skeleton" style={{ height: 26, width: 26, borderRadius: "50%" }} />
+                                            <div className="skeleton" style={{ height: 13, width: `${40 + i * 10}%` }} />
+                                        </div>
+                                        <div className="skeleton" style={{ height: 14, width: 30 }} />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -2730,7 +3031,19 @@
                         } else {
                             // scores or schedule
                             const raw = await fetchScoreboard(effEspn, view, scoreDateOffset);
-                            const events = (raw.events || []).map((e) => parseGame(e, effSport, effBroadcasts)).filter(Boolean);
+                            const targetJst = raw._targetJstDate;
+                            // Filter by JST calendar day
+                            let rawEvents = raw.events || [];
+                            if (view === "scores" && targetJst) {
+                                rawEvents = rawEvents.filter((e) => e.date && isOnJstDate(e.date, targetJst));
+                            } else if (view === "schedule" && targetJst) {
+                                // schedule = from tomorrow JST onward
+                                const tomorrowJst = new Date(targetJst); tomorrowJst.setDate(tomorrowJst.getDate() + 1);
+                                rawEvents = rawEvents.filter((e) => e.date && isAfterJst(e.date, tomorrowJst));
+                            }
+                            const events = rawEvents.map((e) => parseGame(e, effSport, effBroadcasts)).filter(Boolean);
+                            // Sort by date
+                            events.sort((a, b) => (a._sortDate || 0) - (b._sortDate || 0));
                             if (view === "scores") result = { games: events };
                             else result = { upcoming: events };
                         }

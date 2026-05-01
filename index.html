@@ -471,9 +471,9 @@
         };
 
         // -----------------------------
-        // football-data.org API token (get yours from https://www.football-data.org/client/register)
-        // Free tier: 10 requests/min, includes EPL, La Liga, Serie A, Bundesliga, Ligue 1, UCL
-        // 自分のトークンに書き換えてください ↓
+        // football-data.org token is now stored as Vercel environment variable.
+        // Set FOOTBALL_DATA_TOKEN in Vercel project settings, accessed via /api/scorers.
+        // This frontend constant is kept for backward compatibility but is unused.
         // -----------------------------
         const FOOTBALL_DATA_TOKEN = "efc3afed672b4f84aed57eec5fd237de";
 
@@ -489,7 +489,7 @@
         // Free tier: 60 requests/minute, NBA leaders, stats, games
         // 自分のトークンに書き換えてください ↓
         // -----------------------------
-        const BALLDONTLIE_TOKEN = "d27a85ee-083d-4f9e-8a67-44f21032ef4b";
+        const BALLDONTLIE_TOKEN = "YOUR_TOKEN_HERE";
 
         // NBA team ID → name map (used by balldontlie leaders parsing)
         window.__BALLDONTLIE_TEAMS = {
@@ -877,11 +877,12 @@
                 } catch { /* fall through */ }
             }
 
-            // Soccer leagues with football-data.org token configured
-            if (fdId && FOOTBALL_DATA_TOKEN && FOOTBALL_DATA_TOKEN !== "YOUR_TOKEN_HERE") {
+            // Soccer leagues with football-data.org via Vercel Serverless proxy
+            // (direct browser fetch fails due to CORS — server-side fetch via /api/scorers)
+            if (fdId) {
                 try {
-                    const url = `https://api.football-data.org/v4/competitions/${fdId}/scorers?limit=10`;
-                    const res = await fetch(url, { headers: { "X-Auth-Token": FOOTBALL_DATA_TOKEN } });
+                    const url = `/api/scorers?competition=${fdId}&limit=10`;
+                    const res = await fetch(url);
                     if (res.ok) {
                         const json = await res.json();
                         return { footballDataScorers: true, data: json };
@@ -967,6 +968,34 @@
             const res = await fetch(url);
             if (!res.ok) throw new Error(`MLB Stats API ${res.status}`);
             return res.json();
+        }
+        // Find MLB Stats API gamePk for a given ESPN game (by date + team names)
+        async function findMlbGamePk(awayName, homeName, gameDate) {
+            try {
+                // gameDate is "MM/DD" — figure out year (current or last year if month seems future)
+                const now = new Date();
+                const [mm, dd] = (gameDate || "").split("/").map(Number);
+                if (!mm || !dd) return null;
+                let year = now.getFullYear();
+                const candidate = new Date(year, mm - 1, dd);
+                if (candidate.getTime() - now.getTime() > 60 * 86400000) year -= 1;
+                const dateStr = `${year}-${pad(mm)}-${pad(dd)}`;
+                const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${dateStr}`;
+                const res = await fetch(url);
+                if (!res.ok) return null;
+                const json = await res.json();
+                const games = json.dates?.[0]?.games || [];
+                if (games.length === 0) return null;
+                const norm = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+                const a = norm(awayName);
+                const h = norm(homeName);
+                const match = games.find((g) => {
+                    const gAway = norm(g.teams?.away?.team?.name);
+                    const gHome = norm(g.teams?.home?.team?.name);
+                    return (gAway.includes(a) || a.includes(gAway)) && (gHome.includes(h) || h.includes(gHome));
+                });
+                return match?.gamePk || null;
+            } catch { return null; }
         }
 
         // TheSportsDB - free public API (test key "123"), CORS-enabled
@@ -1230,7 +1259,7 @@
                         teamLogo: l.team?.id ? `https://www.mlbstatic.com/team-logos/${l.team.id}.svg` : null,
                         value: l.value ?? "—",
                     }));
-                    result.push({ name: item.meta.label, abbr: item.meta.abbr, entries });
+                    result.push({ name: item.meta.label, abbr: item.meta.abbr, entries, group: item.meta.group });
                 }
                 return result;
             }
@@ -1394,6 +1423,37 @@
                         scorer: p.athletesInvolved?.[0]?.displayName || null,
                     };
                 });
+            }
+
+            // Soccer fallback: if scoringPlays is empty, derive goals from keyEvents or commentary
+            if (sport === "soccer" && out.scoringPlays.length === 0) {
+                const events = Array.isArray(data.keyEvents) ? data.keyEvents : (Array.isArray(data.commentary) ? data.commentary : []);
+                const goalEvents = events.filter((e) => {
+                    const type = e.type?.text || e.type?.id || "";
+                    const text = e.text || "";
+                    return /goal/i.test(type) || /scoring/i.test(type) || (e.scoringPlay === true);
+                });
+                if (goalEvents.length > 0) {
+                    out.scoringPlays = goalEvents.map((p) => {
+                        const teamName = p.team?.displayName || p.team?.name || "";
+                        const isHome = teamName === homeName;
+                        const minute = p.clock?.displayValue || (p.period?.number ? `${p.period.number}'` : "");
+                        const athletes = Array.isArray(p.athletesInvolved) ? p.athletesInvolved : [];
+                        const scorer = athletes[0]?.displayName || athletes[0]?.shortName || null;
+                        const assist = athletes[1]?.displayName || athletes[1]?.shortName || null;
+                        const typeText = p.scoringType?.displayName || p.type?.text || "";
+                        const isPenalty = /penalty/i.test(typeText) || /penalty/i.test(p.text || "");
+                        const isOwnGoal = /own goal/i.test(typeText) || /own goal/i.test(p.text || "");
+                        return {
+                            when: minute,
+                            team: teamName, homeAway: isHome ? "home" : "away",
+                            text: p.text || "Goal",
+                            score: null,
+                            scorer, assist,
+                            scoringType: isPenalty ? "PK" : (isOwnGoal ? "OG" : null),
+                        };
+                    });
+                }
             }
 
             // Linescore (per-quarter / per-period / per-inning scores)
@@ -1870,81 +1930,108 @@
                     <div style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>このリーグの個人成績データはシーズンオフ中、または現在APIで提供されていません。シーズン中に再度お試しください。</div>
                 </div>
             );
+
+            // If MLB (categories have `group` "hitting" or "pitching"), split into sections
+            const hasGroups = categories.some((c) => c.group === "hitting" || c.group === "pitching");
+            const renderCategory = (cat, ci) => {
+                const top3 = cat.entries.slice(0, 3);
+                const rest = cat.entries.slice(3);
+                const podiumOrder = top3.length === 3 ? [top3[1], top3[0], top3[2]] : top3;
+                const podiumRanks = top3.length === 3 ? [2, 1, 3] : top3.map((_, i) => i + 1);
+                const podiumHeights = top3.length === 3 ? [88, 110, 76] : top3.map(() => 92);
+                return (
+                    <div key={ci} className="scale-in" style={{ animationDelay: `${ci * 0.05}s` }}>
+                        <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: 2, textTransform: "uppercase" }}>{cat.name}</div>
+                            {cat.abbr && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, letterSpacing: 1, padding: "2px 8px", border: `1px solid ${accent}`, borderRadius: 2, fontWeight: 700 }}>{cat.abbr}</span>}
+                        </div>
+                        {top3.length > 0 && (
+                            <div style={{ display: "grid", gridTemplateColumns: top3.length === 3 ? "1fr 1.1fr 1fr" : `repeat(${top3.length}, 1fr)`, gap: 6, marginBottom: rest.length > 0 ? 12 : 0, alignItems: "end" }}>
+                                {podiumOrder.map((p, i) => {
+                                    const rank = podiumRanks[i];
+                                    const height = podiumHeights[i];
+                                    const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉";
+                                    const cls = rank === 1 ? "podium-1" : rank === 2 ? "podium-2" : "podium-3";
+                                    return (
+                                        <div key={i} className={`${cls} scale-in`} style={{ animationDelay: `${0.1 + i * 0.08}s`, padding: "12px 8px 10px", border: "1px solid", textAlign: "center", minHeight: height, display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", gap: 4, position: "relative", overflow: "hidden" }}>
+                                            {rank === 1 && (
+                                                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.08) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmerGold 3s linear infinite", pointerEvents: "none" }}></div>
+                                            )}
+                                            <div className={rank === 1 ? "float-anim" : ""} style={{ fontSize: rank === 1 ? 26 : 20, lineHeight: 1, marginBottom: 4 }}>{medal}</div>
+                                            <div style={{ width: rank === 1 ? 44 : 36, height: rank === 1 ? 44 : 36, borderRadius: "50%", background: "#0a0a0a", border: `2px solid ${rank === 1 ? "#FFD700" : rank === 2 ? "#C0C0C0" : "#CD7F32"}`, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                                {p.headshot ? <img src={p.headshot} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { e.target.style.display = 'none'; }} /> : <I.User size={18} color="#666" />}
+                                            </div>
+                                            <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: rank === 1 ? 12 : 11, color: "#fff", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", padding: "0 2px" }}>{p.name}</div>
+                                            {p.team && (
+                                                <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 9, color: "#999", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", padding: "0 2px" }}>
+                                                    {p.teamLogo && <img src={p.teamLogo} style={{ width: 10, height: 10, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} />}
+                                                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{p.team}</span>
+                                                </div>
+                                            )}
+                                            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: rank === 1 ? 22 : 17, color: rank === 1 ? "#FFD700" : rank === 2 ? "#E0E0E0" : "#CD8050", fontWeight: 800, letterSpacing: 0.5, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{p.value}</div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                        {rest.length > 0 && (
+                            <div className="stagger" style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
+                                {rest.map((e, i) => (
+                                    <div key={i} style={{ display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 10, alignItems: "center", padding: "10px 14px", borderBottom: i < rest.length - 1 ? "1px solid #1a1a1a" : "none" }}>
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#555", fontWeight: 700, textAlign: "center" }}>{i + 4}</span>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
+                                            <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#0a0a0a", border: "1px solid #2a2a2a", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                                {e.headshot ? <img src={e.headshot} alt={e.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(ev) => { ev.target.style.display = 'none'; }} /> : <I.User size={13} color="#555" />}
+                                            </div>
+                                            <div style={{ overflow: "hidden", minWidth: 0 }}>
+                                                <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: "#eee", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</div>
+                                                {e.team && (
+                                                    <div style={{ fontSize: 10, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 4 }}>
+                                                        {e.teamLogo && <img src={e.teamLogo} style={{ width: 11, height: 11, objectFit: 'contain' }} onError={(ev) => { ev.target.style.display = 'none'; }} />}
+                                                        <span>{e.team}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 15, color: accent, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{e.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const renderSection = (title, emoji, cats) => {
+                if (cats.length === 0) return null;
+                return (
+                    <div>
+                        <div style={{ position: "sticky", top: "calc(env(safe-area-inset-top) + 60px)", background: "rgba(10,10,10,0.95)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: "10px 0", marginBottom: 12, zIndex: 4, display: "flex", alignItems: "center", gap: 10, borderBottom: `2px solid ${accent}` }}>
+                            <div style={{ fontSize: 22, lineHeight: 1 }}>{emoji}</div>
+                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 900, fontSize: 22, color: "#fff", letterSpacing: 2, textTransform: "uppercase" }}>{title}</div>
+                            <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${accent}, transparent)` }} />
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 32 }}>
+                            {cats.map((cat, ci) => renderCategory(cat, ci))}
+                        </div>
+                    </div>
+                );
+            };
+
+            if (hasGroups) {
+                const hitting = categories.filter((c) => c.group === "hitting");
+                const pitching = categories.filter((c) => c.group === "pitching");
+                return (
+                    <div>
+                        {renderSection("打撃部門", "🏏", hitting)}
+                        {renderSection("投手部門", "⚾", pitching)}
+                    </div>
+                );
+            }
+
             return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-                    {categories.map((cat, ci) => {
-                        const top3 = cat.entries.slice(0, 3);
-                        const rest = cat.entries.slice(3);
-                        const podiumOrder = top3.length === 3 ? [top3[1], top3[0], top3[2]] : top3;
-                        const podiumRanks = top3.length === 3 ? [2, 1, 3] : top3.map((_, i) => i + 1);
-                        const podiumHeights = top3.length === 3 ? [88, 110, 76] : top3.map(() => 92);
-                        return (
-                            <div key={ci} className="scale-in" style={{ animationDelay: `${ci * 0.1}s` }}>
-                                {/* Category title */}
-                                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-                                    <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: 2, textTransform: "uppercase" }}>{cat.name}</div>
-                                    {cat.abbr && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: accent, letterSpacing: 1, padding: "2px 8px", border: `1px solid ${accent}`, borderRadius: 2, fontWeight: 700 }}>{cat.abbr}</span>}
-                                </div>
-
-                                {/* Podium for top 3 */}
-                                {top3.length > 0 && (
-                                    <div style={{ display: "grid", gridTemplateColumns: top3.length === 3 ? "1fr 1.1fr 1fr" : `repeat(${top3.length}, 1fr)`, gap: 6, marginBottom: rest.length > 0 ? 12 : 0, alignItems: "end" }}>
-                                        {podiumOrder.map((p, i) => {
-                                            const rank = podiumRanks[i];
-                                            const height = podiumHeights[i];
-                                            const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉";
-                                            const cls = rank === 1 ? "podium-1" : rank === 2 ? "podium-2" : "podium-3";
-                                            return (
-                                                <div key={i} className={`${cls} scale-in`} style={{ animationDelay: `${0.1 + i * 0.08}s`, padding: "12px 8px 10px", border: "1px solid", textAlign: "center", minHeight: height, display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", gap: 4, position: "relative", overflow: "hidden" }}>
-                                                    {rank === 1 && (
-                                                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.08) 50%, transparent 100%)", backgroundSize: "200% 100%", animation: "shimmerGold 3s linear infinite", pointerEvents: "none" }}></div>
-                                                    )}
-                                                    <div className={rank === 1 ? "float-anim" : ""} style={{ fontSize: rank === 1 ? 26 : 20, lineHeight: 1, marginBottom: 4 }}>{medal}</div>
-                                                    <div style={{ width: rank === 1 ? 44 : 36, height: rank === 1 ? 44 : 36, borderRadius: "50%", background: "#0a0a0a", border: `2px solid ${rank === 1 ? "#FFD700" : rank === 2 ? "#C0C0C0" : "#CD7F32"}`, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                                        {p.headshot ? <img src={p.headshot} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { e.target.style.display = 'none'; }} /> : <I.User size={18} color="#666" />}
-                                                    </div>
-                                                    <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: rank === 1 ? 12 : 11, color: "#fff", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", padding: "0 2px" }}>{p.name}</div>
-                                                    {p.team && (
-                                                        <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 9, color: "#999", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%", padding: "0 2px" }}>
-                                                            {p.teamLogo && <img src={p.teamLogo} style={{ width: 10, height: 10, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} />}
-                                                            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{p.team}</span>
-                                                        </div>
-                                                    )}
-                                                    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: rank === 1 ? 22 : 17, color: rank === 1 ? "#FFD700" : rank === 2 ? "#E0E0E0" : "#CD8050", fontWeight: 800, letterSpacing: 0.5, fontVariantNumeric: "tabular-nums", marginTop: 4 }}>{p.value}</div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-
-                                {/* Remaining entries (4-10) as compact list */}
-                                {rest.length > 0 && (
-                                    <div className="stagger" style={{ background: "#141414", border: "1px solid #1f1f1f" }}>
-                                        {rest.map((e, i) => (
-                                            <div key={i} style={{ display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 10, alignItems: "center", padding: "10px 14px", borderBottom: i < rest.length - 1 ? "1px solid #1a1a1a" : "none" }}>
-                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#555", fontWeight: 700, textAlign: "center" }}>{i + 4}</span>
-                                                <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
-                                                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#0a0a0a", border: "1px solid #2a2a2a", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                                        {e.headshot ? <img src={e.headshot} alt={e.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(ev) => { ev.target.style.display = 'none'; }} /> : <I.User size={13} color="#555" />}
-                                                    </div>
-                                                    <div style={{ overflow: "hidden", minWidth: 0 }}>
-                                                        <div style={{ fontFamily: "'Manrope', sans-serif", fontSize: 13, color: "#eee", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</div>
-                                                        {e.team && (
-                                                            <div style={{ fontSize: 10, color: "#666", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 4 }}>
-                                                                {e.teamLogo && <img src={e.teamLogo} style={{ width: 11, height: 11, objectFit: 'contain' }} onError={(ev) => { ev.target.style.display = 'none'; }} />}
-                                                                <span>{e.team}</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 15, color: accent, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>{e.value}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
+                    {categories.map((cat, ci) => renderCategory(cat, ci))}
                 </div>
             );
         }
@@ -1961,7 +2048,29 @@
                     try {
                         const raw = await fetchSummary(espnPath, game.id);
                         if (!mounted) return;
-                        setDetail(parseSummary(raw, sport));
+                        const espnDetail = parseSummary(raw, sport);
+                        setDetail(espnDetail);
+
+                        // For MLB: fetch richer data from MLB Stats API in parallel & merge
+                        if (sport === "baseball" && isMlbOfficial) {
+                            const gamePk = await findMlbGamePk(game.away, game.home, game.date);
+                            if (!mounted || !gamePk) return;
+                            try {
+                                const mlbRaw = await fetchMlbDetail(gamePk);
+                                if (!mounted) return;
+                                const mlbDetail = parseMlbSummary(mlbRaw);
+                                // Merge: MLB official data takes priority (richer scoring plays, linescore w/ H/E, etc.)
+                                setDetail((prev) => ({
+                                    ...(prev || {}),
+                                    scoringPlays: mlbDetail.scoringPlays?.length > 0 ? mlbDetail.scoringPlays : prev?.scoringPlays,
+                                    linescore: mlbDetail.linescore || prev?.linescore,
+                                    teamStats: mlbDetail.teamStats || prev?.teamStats,
+                                    lineups: mlbDetail.lineups || prev?.lineups,
+                                    venue: mlbDetail.venue || prev?.venue,
+                                    attendance: mlbDetail.attendance || prev?.attendance,
+                                }));
+                            } catch { /* ignore - keep ESPN data */ }
+                        }
                     } catch (e) {
                         if (mounted) setError(e.message);
                     } finally {
@@ -2251,14 +2360,6 @@
                                                     ))}
                                                 </div>
                                             )}
-                                        </div>
-                                    )}
-
-                                    {/* Team stats */}
-                                    {detail.teamStats && (
-                                        <div style={{ marginBottom: 20 }}>
-                                            <div style={{ fontFamily: "'Big Shoulders Display', sans-serif", fontWeight: 800, fontSize: 14, color: league.accent, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>Team Stats</div>
-                                            <TeamStatsTable game={game} stats={detail.teamStats} />
                                         </div>
                                     )}
 
